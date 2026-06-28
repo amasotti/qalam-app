@@ -10,7 +10,7 @@ Separate repository: `qalam-android` (public repo, private use).
 
 Companion documents:
 - `android-design.md` — colors, fonts, spacing, animations — source of truth from prototype
-- `android-plan.md` — phased implementation guide for building from scratch
+- `android-plan.md` — phased implementation guide for the build process
 
 ---
 
@@ -173,10 +173,11 @@ Plain HTTP to Tailscale subnet only. Configured via `res/xml/network_security_co
 
 ## Design
 
-All visual decisions from the interactive prototype (`Qalam.dc.html`). See `android-design.md`.
+All visual decisions from the interactive prototype (`Qalam.dc.html`). We use **Material 3** as our 
+design system engine, customized with our specific tokens. See `android-design.md`.
 
 Key non-negotiables:
-- Warm parchment palette — not Material 3 defaults. Do not substitute.
+- Warm parchment palette mapped to M3 roles — not default Material 3 colors.
 - Three font families: Hanken Grotesk (UI), Newsreader (prose/transliteration), Amiri (Arabic)
 - Arabic text: always RTL, Amiri font, ≥ 24sp for body, larger for hero
 - Mastery colors: Unseen `#A99F8B` · Learning `#B07D26` · Reviewing `#2F6E9E` · Mastered `#1F6F5C`

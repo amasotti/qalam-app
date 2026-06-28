@@ -1,7 +1,7 @@
 # Qalam Android — Implementation Plan
 
-Target reader: an AI agent or developer with no prior Android/Compose experience building
-this app from scratch. Follow phases in order. Each phase ships something runnable.
+Target reader: an AI agent or developer with no prior Android/Compose experience building 
+this app. Follow phases in order. Each phase ships something runnable.
 
 Companion documents (read before starting):
 - `android-spec.md` — architecture, stack decisions, API contract
@@ -192,27 +192,19 @@ For `account_tree` (roots) — verify it's in the extended set; if not, use SVG 
 
 ## Phase 1 — Theme + skeleton navigation
 
-Goal: app launches, shows bottom nav, can switch between 4 empty screens.
+Goal: app launches, shows bottom nav, can switch between 4 empty screens. We use **Material 3** 
+as the foundation, overriding its defaults with our design tokens.
 
 ### 1.1 Theme (`ui/theme/`)
 
-**Color.kt** — define every token from `android-design.md` as a named `Color`:
-```kotlin
-val QalamBg = Color(0xFFF4EEE2)
-val QalamPaper = Color(0xFFFBF7EF)
-val QalamSurface = Color(0xFFFFFEFB)
-// ... all tokens
-val MasteryUnseen = Color(0xFFA99F8B)
-val MasteryLearning = Color(0xFFB07D26)
-val MasteryReviewing = Color(0xFF2F6E9E)
-val MasteryMastered = Color(0xFF1F6F5C)
-```
+**Color.kt** — define every token from `android-design.md` as a named `Color`.
 
-**Type.kt** — define `Typography` using the three font families.
-Load fonts via `FontFamily(Font(R.font.hanken_grotesk_regular), ...)`.
+**Type.kt** — define `Typography` using the three font families. Map them to M3 roles 
+(e.g., `displayLarge` → Amiri, `bodyLarge` → Hanken Grotesk).
 
-**Theme.kt** — `QalamTheme` wraps content in `MaterialTheme` with custom colorScheme mapped from
-tokens. The app is light-only — no dark theme logic needed.
+**Theme.kt** — `QalamTheme` wraps content in `MaterialTheme` with a custom `ColorScheme` 
+mapped from our tokens to M3 roles. This ensures standard M3 components (Buttons, Chips, 
+NavigationBars) automatically adopt the Qalam visual identity. The app is light-only.
 
 ### 1.2 Navigation
 

@@ -1,37 +1,57 @@
 # Qalam Android — Design System
 
-Source of truth extracted from `Qalam.dc.html`. All colors, fonts, and spacing decisions come from
-the interactive prototype. Do not substitute Material 3 defaults without explicit approval.
+Source of truth extracted from `Qalam.dc.html`. We use **Material 3** as our underlying design engine, 
+while strictly mapping all colors, fonts, and spacing tokens to match the interactive prototype. 
+Standard M3 components (Buttons, Chips, Nav Bars) should be used where they align with the 
+wireframe's structure, allowing our custom tokens to drive their visual identity.
 
 ---
 
-## Color tokens → Compose equivalents
+## Color tokens & Material 3 Roles
 
-Map every CSS variable to a named Kotlin `Color` in `ui/theme/Color.kt`.
+We map our custom CSS variables to standard **Material 3 Color Roles**. This ensures that 
+built-in M3 components (like `TextField`, `NavigationBar`, and `TopAppBar`) use the correct 
+visual identity automatically.
 
-| Token | Hex | Usage |
+| M3 Role | Qalam Token | Hex | Usage |
+|---|---|---|---|
+| `background` | `--bg` | `#F4EEE2` | App background (scaffold background) |
+| `surface` | `--surface` | `#FFFEFB` | Cards, input fields |
+| `surfaceVariant` | `--surface-2` | `#F1E9DA` | Chip backgrounds, section fills |
+| `primary` | `--primary` | `#1F6F5C` | Primary action, active nav |
+| `primaryContainer` | `--primary-c` | `#C3E9DA` | Mastered pill, summary card |
+| `onPrimaryContainer` | `--on-primary-c` | `#053C2E` | Text on primary container |
+| `outline` | `--outline` | `#E0D6C2` | Card borders, dividers |
+| `error` | `--terra` | `#B85537` | Error, "again" state |
+| `errorContainer` | `--terra-c` | `#F6D9CE` | Error container, "again" card |
+| (Custom) | `--paper` | `#FBF7EF` | Bottom sheets, nav bar background |
+| (Custom) | `--gold` | `#B07D26` | Root accent, FAB background |
+
+### All tokens
+
+| Token | Hex | Role / Mapping |
 |---|---|---|
-| `--bg` | `#F4EEE2` | App background (scaffold background) |
-| `--paper` | `#FBF7EF` | Bottom sheets, nav bar background |
-| `--surface` | `#FFFEFB` | Cards, input fields |
-| `--surface-2` | `#F1E9DA` | Chip backgrounds, section fills |
-| `--surface-3` | `#E7DDC8` | Progress track, skeleton fills |
-| `--ink` | `#231F17` | Primary text |
-| `--ink-2` | `#6E6555` | Secondary text, labels |
-| `--ink-3` | `#9A917D` | Placeholder, hints, icons |
-| `--outline` | `#E0D6C2` | Card borders, dividers |
-| `--outline-2` | `#D2C6AE` | Stronger dividers |
-| `--primary` | `#1F6F5C` | Primary action, active nav, FAB border |
-| `--primary-d` | `#155244` | Primary pressed state |
-| `--on-primary` | `#FFFFFF` | Text on primary |
-| `--primary-c` | `#C3E9DA` | Primary container (mastered pill, summary card) |
-| `--on-primary-c` | `#053C2E` | Text on primary container |
-| `--gold` | `#B07D26` | Root accent, FAB background |
-| `--gold-c` | `#F2E2BD` | Root card background, gold container |
-| `--terra` | `#B85537` | Error, "again" state |
-| `--terra-c` | `#F6D9CE` | Error container, offline banner, "again" card |
-| `--lapis` | `#2F6E9E` | Texts accent, "reviewing" mastery |
-| `--lapis-c` | `#D2E4F2` | Lapis container, linked-token highlight |
+| `--bg` | `#F4EEE2` | `background` |
+| `--paper` | `#FBF7EF` | (Extra) Secondary surface |
+| `--surface` | `#FFFEFB` | `surface` |
+| `--surface-2` | `#F1E9DA` | `surfaceVariant` |
+| `--surface-3` | `#E7DDC8` | (Extra) Skeleton / Track |
+| `--ink` | `#231F17` | `onBackground`, `onSurface` |
+| `--ink-2` | `#6E6555` | `onSurfaceVariant` |
+| `--ink-3` | `#9A917D` | (Extra) Placeholders |
+| `--outline` | `#E0D6C2` | `outline` |
+| `--outline-2` | `#D2C6AE` | (Extra) Stronger outline |
+| `--primary` | `#1F6F5C` | `primary` |
+| `--primary-d` | `#155244` | (Custom) Primary Pressed |
+| `--on-primary` | `#FFFFFF` | `onPrimary` |
+| `--primary-c` | `#C3E9DA` | `primaryContainer` |
+| `--on-primary-c` | `#053C2E` | `onPrimaryContainer` |
+| `--gold` | `#B07D26` | (Custom) Root Accent / FAB |
+| `--gold-c` | `#F2E2BD` | (Custom) Gold Container |
+| `--terra` | `#B85537` | `error` |
+| `--terra-c` | `#F6D9CE` | `errorContainer` |
+| `--lapis` | `#2F6E9E` | (Custom) Texts Accent |
+| `--lapis-c` | `#D2E4F2` | (Custom) Lapis Container |
 
 ### Mastery colors
 

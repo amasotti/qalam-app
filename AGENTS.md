@@ -17,7 +17,7 @@ We operate in **Pair Programming** mode as defined in the `pair-programming` ski
 - **Default Mode:** **Coach mode** (User writes, Agent guides). The Agent should only "Take Over" a slice if explicitly requested.
 - **Slicing:** Every task must be broken into small, reviewable slices that advance the product.
 - **Ephemeral Guidance:** For any implementation task, create a walkthrough in `.pairing/<YYYY-MM-DD>-<task-slug>.md`. This file should be technical, concise, and deleted upon task completion.
-- **Teaching:** When introducing genuinely new or domain-specific concepts, provide a 2-4 sentence explanation. Skip trivial programming concepts.
+- **Teaching calibration:** User is an experienced Kotlin developer (server-side / Ktor / backend). Has **zero prior Android experience**. Explain Android-specific concepts at length in guidance files: the Compose runtime model (`@Composable`, recomposition, slots), Android resource system (`res/font/`, `res/xml/`, naming rules), Activity lifecycle, Hilt/KSP annotation processing, Gradle/AGP conventions, `AndroidManifest.xml` attributes. Skip trivial Kotlin syntax — the user knows it.
 - **Human-Commits Rule:** Agents never commit to git. All version control actions are performed by the user.
 
 ## Tech Stack & Quality Gates
@@ -45,7 +45,8 @@ Remote (ApiClient) + Local (Room DAOs)
 - **API:** Base URL from DataStore (never hardcoded). Derive DTOs from `GET /api/v1/openapi.json`.
 
 ## UI — Design & Arabic Rules
-- **Palette:** Warm parchment (see `docs/android-design.md`). Do not use Material3 defaults.
+- **Design Engine:** Material 3 (M3). Use standard M3 components (Scaffold, TopAppBar, Chips, Buttons) but skin them with our tokens.
+- **Palette:** Warm parchment (see `docs/android-design.md`). Map CSS variables to M3 ColorRoles.
 - **Fonts:** Hanken Grotesk (UI), Newsreader (Prose), **Amiri (Arabic)**.
 - **Arabic Handling:** Always use `layoutDirection = LayoutDirection.Rtl`, Amiri font, `fontSize >= 24.sp`.
 - **Mastery Colors:** 
