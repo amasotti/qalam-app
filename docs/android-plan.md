@@ -81,7 +81,7 @@ dependencies {
 }
 ```
 
-### 🔄 0.4 Fonts — **current slice** (download + res/font/ + Type.kt)
+### ✅ 0.4 Fonts — res/font/ + Type.kt complete
 
 Download and add to `app/src/main/res/font/`:
 - `hanken_grotesk_regular.ttf`, `_medium.ttf`, `_semibold.ttf`, `_bold.ttf`
@@ -99,7 +99,7 @@ if not, use SVG vector drawable.
 Goal: app launches, shows bottom nav, can switch between 4 empty screens. We use **Material 3** 
 as the foundation, overriding its defaults with our design tokens.
 
-### 🔄 1.1 Theme (`ui/theme/`) — Color.kt ✅ · Theme.kt ✅ · Type.kt see Phase 0.4
+### ✅ 1.1 Theme (`ui/theme/`) — Color.kt · Theme.kt · Type.kt complete
 
 **Color.kt** — define every token from `android-design.md` as a named `Color`.
 
@@ -111,14 +111,16 @@ in the Typography scale — applied explicitly via `ArabicText` composable).
 mapped from our tokens to M3 roles. This ensures standard M3 components (Buttons, Chips,
 NavigationBars) automatically adopt the Qalam visual identity. The app is light-only.
 
-### ❌ 1.2 Navigation
+### 🔄 1.2 Navigation — **current slice**
+
+**Library decision:** use `androidx.navigation3` (Navigation3), NOT `androidx.navigation:navigation-compose`.
+`navigation-compose` 2.x is in maintenance mode; Navigation3 is the Compose-first replacement, stable at 1.1.3.
 
 **Build setup (do this first):** add to `libs.versions.toml` and wire into `build.gradle.kts`:
-- Plugin: `kotlin-android` (`org.jetbrains.kotlin.android`) — needed to compile Kotlin for Android
-- Plugin: `kotlin-serialization` (`org.jetbrains.kotlin.plugin.serialization`) — needed for type-safe nav
-- Lib: `navigation-compose`
+- Plugin: `kotlin-serialization` (`org.jetbrains.kotlin.plugin.serialization`) — inert now, needed in Phase 2 for Ktor. Do NOT add `kotlin-android` — AGP 9 applies it internally; explicit declaration causes a classpath conflict.
+- Lib: `navigation3-runtime` + `navigation3-ui` (`androidx.navigation3`, v1.1.3)
 - Lib: `compose-icons-extended` (material-icons-extended, used by bottom nav + throughout app)
-- Lib: `kotlinx-serialization-json` (required by navigation-compose type safety)
+- No `kotlin-serialization` or `kotlinx-serialization-json` yet — Navigation3 doesn't require `@Serializable` on destinations. Serialization arrives in Phase 2 with Ktor.
 
 Use type-safe Navigation Compose (2.8+). Define a sealed hierarchy:
 
