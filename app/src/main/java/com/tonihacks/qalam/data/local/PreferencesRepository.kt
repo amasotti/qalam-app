@@ -18,7 +18,7 @@ class PreferencesRepository @Inject constructor(
 
     companion object {
         private val BASE_URL_KEY = stringPreferencesKey("base_url")
-        const val DEFAULT_URL = "http://100.118.111.4"
+        const val DEFAULT_URL = "http://100.118.111.2"
     }
 
     val baseUrl: Flow<String> = dataStore.data
