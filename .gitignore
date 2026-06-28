@@ -13,4 +13,12 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+.scratch/
 .pairing/
+
+wireframe/*.jsx
+wireframe/*.js
+wireframe/.thumbnail
+wireframe/*.html
+!wireframe/Qalam Android Native Design.zip
