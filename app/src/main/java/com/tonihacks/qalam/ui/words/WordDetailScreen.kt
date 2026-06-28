@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tonihacks.qalam.domain.model.DictionaryLink
 import com.tonihacks.qalam.domain.model.Example
 import com.tonihacks.qalam.domain.model.Word
 import com.tonihacks.qalam.ui.theme.QalamGold
@@ -74,6 +75,7 @@ fun WordDetailScreen(
         is WordDetailUiState.Success -> WordDetailContent(
             word = s.word,
             examples = s.examples,
+            dictionaries = s.dictionaries,
             onBack = onBack,
             onNavigateToRoot = onNavigateToRoot,
             onNavigateToWord = onNavigateToWord,
@@ -86,6 +88,7 @@ fun WordDetailScreen(
 fun WordDetailContent(
     word: Word,
     examples: List<Example>,
+    dictionaries: List<DictionaryLink>,
     onBack: () -> Unit,
     onNavigateToRoot: (String) -> Unit,
     onNavigateToWord: (String) -> Unit,
@@ -207,8 +210,12 @@ fun WordDetailContent(
             }
         }
 
-        // 8. Pronunciation link
-        word.pronunciationUrl?.let { url ->
+        // 8. Dictionary links (from /words/{id}/dictionary-links) + pronunciationUrl fallback
+        val allLinks = buildList {
+            addAll(dictionaries)
+            word.pronunciationUrl?.let { add(DictionaryLink(id = "pronunciation", source = "Pronunciation", url = it)) }
+        }
+        if (allLinks.isNotEmpty()) {
             item {
                 Text(
                     "DICTIONARIES",
@@ -216,7 +223,9 @@ fun WordDetailContent(
                     modifier = Modifier.padding(start = 22.dp, top = 16.dp, bottom = 8.dp),
                     color = QalamInk2,
                 )
-                DictionaryRow(name = "Pronunciation (Forvo)", url = url)
+            }
+            items(allLinks, key = { it.id }) { link ->
+                DictionaryRow(name = link.source, url = link.url)
             }
         }
 

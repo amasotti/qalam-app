@@ -1,5 +1,6 @@
 package com.tonihacks.qalam.data.api
 
+import com.tonihacks.qalam.data.api.dto.DictionaryLinkDto
 import com.tonihacks.qalam.data.api.dto.ExampleDto
 import com.tonihacks.qalam.data.api.dto.PagedResponseDto
 import com.tonihacks.qalam.data.api.dto.WordDraftDto
@@ -45,6 +46,10 @@ class ApiClient @Inject constructor(
 
     suspend fun getExamples(baseUrl: String, wordId: String): Result<List<ExampleDto>> = runCatching {
         httpClient.get("$baseUrl/api/v1/words/$wordId/examples").body()
+    }
+
+    suspend fun getDictionaryLinks(baseUrl: String, wordId: String): Result<List<DictionaryLinkDto>> = runCatching {
+        httpClient.get("$baseUrl/api/v1/words/$wordId/dictionary-links").body()
     }
 
     suspend fun createWord(baseUrl: String, draft: WordDraftDto): Result<WordDto> = runCatching {

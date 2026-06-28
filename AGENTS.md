@@ -53,7 +53,7 @@ Remote (ApiClient) + Local (Room DAOs)
 - **DTOs:** Live in `data/api/dto/`. Never leak into UI or domain layers.
 - **Domain Models:** Live in `domain/model/`. Pure Kotlin, no framework imports.
 - **DI:** Hilt is mandatory. `@HiltAndroidApp` on Application, `@AndroidEntryPoint` on every Activity. Bind implementations in `di/RepositoryModule.kt`.
-- **API:** Base URL from DataStore (never hardcoded). Derive DTOs from `GET /api/v1/openapi.json`.
+- **API:** Base URL from DataStore (never hardcoded). **Before implementing any DTO or API call, fetch and read the actual OpenAPI spec from `http://localhost:8085/api/v1/swagger-ui/documentation.yaml`.** Never infer field names, endpoint paths, or response shapes from context — the spec is the only source of truth. Guessing field names or assuming endpoints exist / don't exist without checking the spec is a critical error.
 
 ## UI — Design & Arabic Rules
 - **Design Engine:** Material 3 (M3). Use standard M3 components (Scaffold, TopAppBar, Chips, Buttons) but skin them with our tokens.

@@ -19,6 +19,13 @@ data class WordDto(
 )
 
 @Serializable
+data class DictionaryLinkDto(
+    val id: String,
+    val source: String,
+    val url: String,
+)
+
+@Serializable
 data class WordDraftDto(
     val arabicText: String,
     val translation: String,
@@ -41,5 +48,7 @@ fun WordDto.toDomain() = Word(
 )
 
 fun ExampleDto.toDomain() = Example(id, arabic, transliteration, translation)
+
+fun DictionaryLinkDto.toDomain() = DictionaryLink(id, source, url)
 
 fun WordDraft.toDto() = WordDraftDto(arabicText, translation, transliteration, partOfSpeech, dialect)

@@ -11,6 +11,13 @@ data class Word(
     val rootId: String?,
     val notes: String?,
     val pronunciationUrl: String?,
+    val dictionaries: List<DictionaryLink> = emptyList(),
+)
+
+data class DictionaryLink(
+    val id: String,
+    val source: String,
+    val url: String,
 )
 
 data class Example(
