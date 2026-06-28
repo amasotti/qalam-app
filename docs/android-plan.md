@@ -157,11 +157,11 @@ Deliverable: `./gradlew assembleDebug` succeeds, app runs, tabs navigate.
 
 ---
 
-## 🔄 Phase 2 — Settings + connection layer — **next slice**
+## ✅ Phase 2 — Settings + connection layer
 
 Goal: user can enter a base URL, app verifies it, shows connection status.
 
-**Build setup (do this first):** add to `libs.versions.toml` and wire into `build.gradle.kts`:
+**✅ Build setup:** add to `libs.versions.toml` and wire into `build.gradle.kts`:
 - Plugin: `hilt` (`com.google.dagger.hilt.android`) + `ksp` (`com.google.devtools.ksp`)
   — Hilt is Android's DI framework built on Dagger; KSP is the annotation processor that generates its code
 - Lib: `hilt-android` + `hilt-android-compiler` (ksp) + `hilt-navigation-compose`
@@ -193,7 +193,7 @@ Goal: user can enter a base URL, app verifies it, shows connection status.
     ...>
 ```
 
-### 2.1 DataStore
+### ✅ 2.1 DataStore
 
 `data/local/PreferencesRepository.kt`:
 ```kotlin
@@ -201,7 +201,7 @@ val baseUrl: Flow<String>   // default: "http://100.x.x.x:8080"
 suspend fun setBaseUrl(url: String)
 ```
 
-### 2.2 Ktor client
+### ✅ 2.2 Ktor client
 
 `data/api/QalamHttpClient.kt`:
 ```kotlin
@@ -218,14 +218,14 @@ because the user can change it in settings.
 `data/api/ApiClient.kt` — wraps all endpoint calls, returns `Result<T>`.
 All calls catch `IOException` and `HttpException` → `Result.failure(...)`.
 
-### 2.3 Settings screen
+### ✅ 2.3 Settings screen
 
 `ui/settings/SettingsScreen.kt`:
 - Text field: base URL input (pre-filled from DataStore)
 - "Test connection" button → `GET /api/v1/analytics/overview` → show ✓ or error
 - Save button writes to DataStore
 
-### 2.4 Connection indicator on Home
+### ✅ 2.4 Connection indicator on Home
 
 Home screen top-right: pulsing green dot + "MacBook" label (or "Offline" + terra dot).
 Driven by a `SettingsViewModel` that pings the API every time the app foregrounds.
@@ -234,7 +234,7 @@ Deliverable: can enter `http://100.x.x.x:8080`, test connection, save.
 
 ---
 
-## Phase 3 — Words
+## 🔄 Phase 3 — Words
 
 ### 3.1 DTOs
 

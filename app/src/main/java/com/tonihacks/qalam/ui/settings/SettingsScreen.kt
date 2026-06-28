@@ -1,5 +1,6 @@
 package com.tonihacks.qalam.ui.settings
 
+import android.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,7 +49,8 @@ fun SettingsScreen(
             onValueChange = viewModel::onUrlChange,
             label = { Text("Base URL") },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = Typography.bodyMedium
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -56,10 +58,10 @@ fun SettingsScreen(
                 onClick = viewModel::testConnection,
                 enabled = status != SettingsViewModel.ConnectionStatus.Checking,
             ) {
-                Text("Test")
+                Text("Test", style = Typography.bodyMedium)
             }
             Button(onClick = viewModel::saveUrl) {
-                Text("Save")
+                Text("Save", style = Typography.bodyMedium)
             }
         }
 

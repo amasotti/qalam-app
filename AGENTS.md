@@ -53,7 +53,17 @@ Remote (ApiClient) + Local (Room DAOs)
 - **Mastery Colors:** 
     - Unseen: `#A99F8B` | Learning: `#B07D26` | Reviewing: `#2F6E9E` | Mastered: `#1F6F5C`
 - **Light Mode Only:** No dark theme support.
+- **MANDATORY — Qalam tokens only:** All code examples and guidance files MUST use Qalam design tokens (see wireframe folder). Never use `MaterialTheme.typography.*` or `MaterialTheme.colorScheme.*` directly. Use `Typography.*` (from `com.tonihacks.qalam.ui.theme`) and named color constants (`QalamPrimary`, `QalamTerra`, `QalamInk`, `QalamBg`, etc.). M3 defaults bypass the custom fonts and palette entirely.
 
 ## Phase Discipline
 We follow the 8 phases in `docs/android-plan.md`. Advancement is tracked *only* in that file. Never reference the plan or phase progress in code comments or READMEs.
+
+## MANDATORY Slice Workflow
+The Agent MUST follow these steps in order when completing a slice and moving to the next:
+
+1. **Verify** the user's implementation (read the changed files).
+2. **Update `docs/android-plan.md`** — mark the completed slice ✅, the current one 🔄, using the exact section numbering from the plan.
+3. **Then** create the next pairing file.
+
+Skipping step 2 is not permitted. The plan is the single progress source of truth for both the user and future agents.
 
