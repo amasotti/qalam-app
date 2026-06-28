@@ -27,7 +27,7 @@ Minimum SDK: 29. Target SDK: 35. Language: Kotlin 2.x. Build system: Gradle (Kot
 
 ## Phase 0 — Project bootstrap
 
-### 0.1 Create project
+### ✅ 0.1 Create project
 
 In Android Studio: **New Project → Empty Activity** (Compose template).
 - Package name: `com.toni.qalam`
@@ -35,158 +35,62 @@ In Android Studio: **New Project → Empty Activity** (Compose template).
 - Language: Kotlin
 - Min SDK: 29
 
-### 0.2 Version catalog
+### ✅ 0.2 Version catalog
 
-Replace generated deps with a `libs.versions.toml` version catalog (`gradle/libs.versions.toml`).
-Pin all versions explicitly. Key versions to start:
+`gradle/libs.versions.toml` exists with Compose BOM, basic Compose deps, and detekt.
+Grows incrementally — new entries are added at the start of the phase that first needs them.
 
-```toml
-[versions]
-kotlin = "2.1.21"
-compose-bom = "2025.06.00"       # always use BOM — pins all Compose libs together
-ktor = "3.1.3"
-hilt = "2.56.2"
-navigation = "2.9.0"
-room = "2.7.1"
-datastore = "1.1.6"
+### ✅ 0.3 app/build.gradle.kts — minimal Compose skeleton
 
-[libraries]
-# Compose (via BOM — no version needed on individual entries)
-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
-compose-ui = { group = "androidx.compose.ui", name = "ui" }
-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-compose-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
-
-# Navigation
-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
-
-# Ktor client
-ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
-ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor" }
-ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
-ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
-ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
-
-# DI
-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
-hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version = "1.2.0" }
-
-# Room
-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-
-# DataStore
-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
-
-# Serialization
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.8.1" }
-
-[plugins]
-android-application = { id = "com.android.application", version = "8.10.1" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-ksp = { id = "com.google.devtools.ksp", version = "2.1.21-1.0.32" }
-```
-
-**Important:** always fetch current versions from Maven Central / Android releases before writing.
-Never use versions from memory — they will be stale.
-
-### 0.3 app/build.gradle.kts skeleton
+Current actual state — only what is wired and needed right now:
 
 ```kotlin
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.detekt)
 }
 
 android {
-    namespace = "com.toni.qalam"
-    compileSdk = 35
+    namespace = "com.tonihacks.qalam"
+    compileSdk = 36
     defaultConfig {
-        applicationId = "com.toni.qalam"
-        minSdk = 29
-        targetSdk = 35
+        applicationId = "com.tonihacks.qalam"
+        minSdk = 31
+        targetSdk = 36
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "1.0"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true }
 }
 
+kotlin { jvmToolchain(17) }
+
 dependencies {
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.ui)
-    implementation(libs.compose.material3)
-    implementation(libs.compose.ui.tooling)
-    implementation(libs.compose.icons.extended)
-    implementation(libs.activity.compose)
-    implementation(libs.navigation.compose)
-
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.android)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.client.logging)
-
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
-    implementation(libs.hilt.navigation.compose)
-
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
-
-    implementation(libs.datastore.preferences)
-    implementation(libs.kotlinx.serialization.json)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
 }
 ```
 
-### 0.4 Fonts
+### 🔄 0.4 Fonts — **current slice** (download + res/font/ + Type.kt)
 
 Download and add to `app/src/main/res/font/`:
 - `hanken_grotesk_regular.ttf`, `_medium.ttf`, `_semibold.ttf`, `_bold.ttf`
 - `newsreader_regular.ttf`, `_italic.ttf`
 - `amiri_regular.ttf`, `_bold.ttf`
 
-Material Symbols: use `androidx.compose.material:material-icons-extended` for standard icons.
-For `account_tree` (roots) — verify it's in the extended set; if not, use SVG vector drawable.
-
-### 0.5 Network security config
-
-`app/src/main/res/xml/network_security_config.xml`:
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<network-security-config>
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">ts.net</domain>
-        <!-- also allow bare IP for local testing -->
-        <domain includeSubdomains="false">10.0.2.2</domain>
-    </domain-config>
-</network-security-config>
-```
-
-`AndroidManifest.xml` — required attributes:
-```xml
-<uses-permission android:name="android.permission.INTERNET" />
-<application
-    android:networkSecurityConfig="@xml/network_security_config"
-    android:label="Qalam"
-    ...>
-```
+Material Symbols: use `androidx.compose.material:material-icons-extended` (added in Phase 1.2
+alongside navigation deps). For `account_tree` (roots) — verify it's in the extended set;
+if not, use SVG vector drawable.
 
 ---
 
@@ -195,18 +99,26 @@ For `account_tree` (roots) — verify it's in the extended set; if not, use SVG 
 Goal: app launches, shows bottom nav, can switch between 4 empty screens. We use **Material 3** 
 as the foundation, overriding its defaults with our design tokens.
 
-### 1.1 Theme (`ui/theme/`)
+### 🔄 1.1 Theme (`ui/theme/`) — Color.kt ✅ · Theme.kt ✅ · Type.kt see Phase 0.4
 
 **Color.kt** — define every token from `android-design.md` as a named `Color`.
 
-**Type.kt** — define `Typography` using the three font families. Map them to M3 roles 
-(e.g., `displayLarge` → Amiri, `bodyLarge` → Hanken Grotesk).
+**Type.kt** — define `Typography` using the three font families. Map them to M3 roles
+(Newsreader → display/headline; Hanken Grotesk → title/body/label; Amiri declared but not
+in the Typography scale — applied explicitly via `ArabicText` composable).
 
-**Theme.kt** — `QalamTheme` wraps content in `MaterialTheme` with a custom `ColorScheme` 
-mapped from our tokens to M3 roles. This ensures standard M3 components (Buttons, Chips, 
+**Theme.kt** — `QalamTheme` wraps content in `MaterialTheme` with a custom `ColorScheme`
+mapped from our tokens to M3 roles. This ensures standard M3 components (Buttons, Chips,
 NavigationBars) automatically adopt the Qalam visual identity. The app is light-only.
 
-### 1.2 Navigation
+### ❌ 1.2 Navigation
+
+**Build setup (do this first):** add to `libs.versions.toml` and wire into `build.gradle.kts`:
+- Plugin: `kotlin-android` (`org.jetbrains.kotlin.android`) — needed to compile Kotlin for Android
+- Plugin: `kotlin-serialization` (`org.jetbrains.kotlin.plugin.serialization`) — needed for type-safe nav
+- Lib: `navigation-compose`
+- Lib: `compose-icons-extended` (material-icons-extended, used by bottom nav + throughout app)
+- Lib: `kotlinx-serialization-json` (required by navigation-compose type safety)
 
 Use type-safe Navigation Compose (2.8+). Define a sealed hierarchy:
 
@@ -234,7 +146,7 @@ Use type-safe Navigation Compose (2.8+). Define a sealed hierarchy:
 // - floatingActionButton: Train FAB (shown on Home + WordList)
 ```
 
-### 1.3 Bottom nav component
+### ❌ 1.3 Bottom nav component
 
 `components/QalamBottomNav.kt` — 4 tabs, active/inactive states per design spec.
 Active = filled icon + `primary-c` pill. Inactive = outlined icon only.
@@ -246,6 +158,38 @@ Deliverable: `./gradlew assembleDebug` succeeds, app runs, tabs navigate.
 ## Phase 2 — Settings + connection layer
 
 Goal: user can enter a base URL, app verifies it, shows connection status.
+
+**Build setup (do this first):** add to `libs.versions.toml` and wire into `build.gradle.kts`:
+- Plugin: `hilt` (`com.google.dagger.hilt.android`) + `ksp` (`com.google.devtools.ksp`)
+  — Hilt is Android's DI framework built on Dagger; KSP is the annotation processor that generates its code
+- Lib: `hilt-android` + `hilt-android-compiler` (ksp) + `hilt-navigation-compose`
+- Lib: `ktor-client-core`, `ktor-client-android`, `ktor-client-content-negotiation`,
+  `ktor-serialization-kotlinx-json`, `ktor-client-logging`
+- Lib: `datastore-preferences`
+- Also add `@HiltAndroidApp` annotation to `QalamApp : Application` (new file) and register
+  it in `AndroidManifest.xml` — Hilt requires an annotated Application class as its root.
+
+**Network security config (deferred from Phase 0):**
+
+`app/src/main/res/xml/network_security_config.xml`:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">ts.net</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>
+```
+
+`AndroidManifest.xml` additions:
+```xml
+<uses-permission android:name="android.permission.INTERNET" />
+<application
+    android:name=".QalamApp"
+    android:networkSecurityConfig="@xml/network_security_config"
+    ...>
+```
 
 ### 2.1 DataStore
 
@@ -515,6 +459,9 @@ Every screen: if `ApiClient` throws, show offline banner (terra-c) + cached Room
 `ConnectivityObserver` via `ConnectivityManager.NetworkCallback` → `StateFlow<Boolean>`.
 
 ### 8.2 Room cache (optional, implement if offline is painful without it)
+
+**Build setup:** add to `libs.versions.toml`: `room-runtime`, `room-ktx`, `room-compiler`.
+Wire `ksp(libs.room.compiler)` in `build.gradle.kts` — KSP plugin already present from Phase 2.
 
 Cache words and roots locally. Sync on foreground. Room schema mirrors DTO shapes.
 Use `@Database`, `@Entity`, `@Dao` — Room annotation processor (KSP).
