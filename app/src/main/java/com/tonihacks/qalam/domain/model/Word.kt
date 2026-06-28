@@ -9,7 +9,8 @@ data class Word(
     val dialect: String,
     val masteryLevel: MasteryLevel,
     val rootId: String?,
-    val dictionaries: List<DictionaryLink>,
+    val notes: String?,
+    val pronunciationUrl: String?,
 )
 
 data class Example(
@@ -18,8 +19,6 @@ data class Example(
     val transliteration: String?,
     val translation: String?,
 )
-
-data class DictionaryLink(val name: String, val url: String)
 
 data class WordDraft(
     val arabicText: String,

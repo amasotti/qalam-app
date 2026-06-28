@@ -25,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,11 +41,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonihacks.qalam.domain.model.Example
 import com.tonihacks.qalam.domain.model.Word
-import com.tonihacks.qalam.navigation.WordDetail
 import com.tonihacks.qalam.ui.theme.QalamGold
 import com.tonihacks.qalam.ui.theme.QalamGoldC
 import com.tonihacks.qalam.ui.theme.QalamInk
 import com.tonihacks.qalam.ui.theme.QalamInk2
+import com.tonihacks.qalam.ui.theme.QalamLapis
 import com.tonihacks.qalam.ui.theme.QalamPrimary
 import com.tonihacks.qalam.ui.theme.QalamTerra
 import com.tonihacks.qalam.ui.theme.Typography
@@ -110,28 +111,30 @@ fun WordDetailContent(
 
         // 2. Hero — Arabic centered, RTL subtree
         item {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(22.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Text(
-                        text = word.arabicText,
-                        style = Typography.displayLarge,     // Amiri 57sp — adjust in Type.kt if needed
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-                Spacer(Modifier.height(8.dp))
-                word.transliteration?.let {
-                    Text(
-                        it,
-                        style = Typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                        color = QalamInk2,
-                    )
-                }
-                word.translation?.let {
-                    Text(it, style = Typography.titleMedium, color = QalamInk)
+            SelectionContainer {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(22.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                        Text(
+                            text = word.arabicText,
+                            style = Typography.displayLarge,     // Amiri 57sp — adjust in Type.kt if needed
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    word.transliteration?.let {
+                        Text(
+                            it,
+                            style = Typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+                            color = QalamInk2,
+                        )
+                    }
+                    word.translation?.let {
+                        Text(it, style = Typography.titleMedium, color = QalamInk)
+                    }
                 }
             }
         }
@@ -184,8 +187,28 @@ fun WordDetailContent(
             }
         }
 
-        // 7. Dictionaries
-        if (word.dictionaries.isNotEmpty()) {
+        // 7. Notes
+        word.notes?.let { notes ->
+            item {
+                Text(
+                    "NOTES",
+                    style = Typography.labelSmall.copy(letterSpacing = 2.sp),
+                    modifier = Modifier.padding(start = 22.dp, top = 16.dp, bottom = 8.dp),
+                    color = QalamInk2,
+                )
+                SelectionContainer {
+                    Text(
+                        notes,
+                        style = Typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 22.dp, vertical = 8.dp),
+                        color = QalamInk,
+                    )
+                }
+            }
+        }
+
+        // 8. Pronunciation link
+        word.pronunciationUrl?.let { url ->
             item {
                 Text(
                     "DICTIONARIES",
@@ -193,14 +216,10 @@ fun WordDetailContent(
                     modifier = Modifier.padding(start = 22.dp, top = 16.dp, bottom = 8.dp),
                     color = QalamInk2,
                 )
-            }
-            items(word.dictionaries) { link ->
-                // Open in browser via Intent — implement in DictionaryRow below
-                DictionaryRow(name = link.name, url = link.url)
+                DictionaryRow(name = "Pronunciation (Forvo)", url = url)
             }
         }
 
-        // 8. Same root section — stub for now (needs a separate API call or backend to include siblings)
-        // Add in a follow-up once Root detail is wired (Phase 4)
+        // Same root section — Phase 4
     }
 }

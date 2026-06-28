@@ -21,7 +21,7 @@ data class WordListUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val hasMore: Boolean = true,
-    val currentPage: Int = 0,
+    val currentPage: Int = 1,   // API is 1-based
 )
 
 @HiltViewModel
@@ -36,14 +36,14 @@ class WordListViewModel @Inject constructor(
     init { load() }
 
     fun onQueryChange(q: String) {
-        _uiState.update { it.copy(query = q, items = emptyList(), currentPage = 0, hasMore = true) }
+        _uiState.update { it.copy(query = q, items = emptyList(), currentPage = 1, hasMore = true) }
         load()
         // No debounce here for simplicity. If the backend gets hammered on fast typing,
         // wrap load() in a Job + cancel pattern or use Flow.debounce() from the query StateFlow.
     }
 
     fun onFilterChange(filter: MasteryLevel?) {
-        _uiState.update { it.copy(activeFilter = filter, items = emptyList(), currentPage = 0, hasMore = true) }
+        _uiState.update { it.copy(activeFilter = filter, items = emptyList(), currentPage = 1, hasMore = true) }
         load()
     }
 
@@ -57,7 +57,7 @@ class WordListViewModel @Inject constructor(
         viewModelScope.launch {
             val baseUrl = prefs.baseUrl.first()
             wordRepository.createWord(baseUrl, draft).onSuccess {
-                _uiState.update { it.copy(items = emptyList(), currentPage = 0, hasMore = true) }
+                _uiState.update { it.copy(items = emptyList(), currentPage = 1, hasMore = true) }
                 load()
             }
         }

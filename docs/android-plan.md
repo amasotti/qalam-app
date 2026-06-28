@@ -172,9 +172,11 @@ Deliverable: can read texts interlinearly, tap words, navigate to Word detail fr
 
 No explicit setup screen — matches the prototype.
 "Start training session" on Home and the FAB both call `POST /api/v1/training/sessions`
-with `{ dialect: "MSA", size: 20 }` (configurable later).
+with `{ mode: "ARABIC_TO_TRANSLATION", size: 20 }` (configurable later).
 
-The session response includes the word deck. Store in `TrainingViewModel`.
+The session response includes the word deck (`words: List<TrainingSessionWordResponse>`).
+Each word embeds up to 2 examples and synonym/antonym relations — no separate fetch needed.
+Store deck in `TrainingViewModel`.
 
 ### 6.2 Flashcard screen
 

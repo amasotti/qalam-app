@@ -14,13 +14,8 @@ data class WordDto(
     val difficulty: String,
     val masteryLevel: String, // backend sends "NEW" / "LEARNING" / "KNOWN" / "MASTERED"
     val rootId: String? = null,
-    val dictionaries: List<DictionaryLinkDto> = emptyList(),
-)
-
-@Serializable
-data class DictionaryLinkDto(
-    val name: String,
-    val url: String,
+    val notes: String? = null,
+    val pronunciationUrl: String? = null,
 )
 
 @Serializable
@@ -41,9 +36,10 @@ fun WordDto.toDomain() = Word(
     dialect = dialect,
     masteryLevel = runCatching { MasteryLevel.valueOf(masteryLevel) }.getOrDefault(MasteryLevel.NEW),
     rootId = rootId,
-    dictionaries = dictionaries.map { DictionaryLink(it.name, it.url) },
+    notes = notes,
+    pronunciationUrl = pronunciationUrl,
 )
 
-fun ExampleDto.toDomain() = Example(id, arabicText, transliteration, translation)
+fun ExampleDto.toDomain() = Example(id, arabic, transliteration, translation)
 
 fun WordDraft.toDto() = WordDraftDto(arabicText, translation, transliteration, partOfSpeech, dialect)

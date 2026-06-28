@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -29,19 +30,21 @@ fun ExampleCard(example: Example) {
         colors = CardDefaults.cardColors(containerColor = QalamSurface2),
         shape = RoundedCornerShape(14.dp),
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                Text(
-                    example.arabicText,
-                    style = Typography.titleLarge,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-            example.transliteration?.let {
-                Text(it, style = Typography.bodyMedium.copy(fontStyle = FontStyle.Italic), color = QalamInk2)
-            }
-            example.translation?.let {
-                Text(it, style = Typography.bodyMedium, color = QalamInk)
+        SelectionContainer {
+            Column(modifier = Modifier.padding(14.dp)) {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text(
+                        example.arabicText,
+                        style = Typography.titleLarge,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                example.transliteration?.let {
+                    Text(it, style = Typography.bodyMedium.copy(fontStyle = FontStyle.Italic), color = QalamInk2)
+                }
+                example.translation?.let {
+                    Text(it, style = Typography.bodyMedium, color = QalamInk)
+                }
             }
         }
     }
