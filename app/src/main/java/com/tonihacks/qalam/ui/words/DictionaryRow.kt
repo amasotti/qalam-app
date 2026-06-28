@@ -9,8 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
-import androidx.compose.material.icons.outlined.VolumeUp
+import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,6 +23,13 @@ import androidx.compose.ui.unit.dp
 import com.tonihacks.qalam.ui.theme.QalamLapis
 import com.tonihacks.qalam.ui.theme.QalamLapisC
 import com.tonihacks.qalam.ui.theme.Typography
+import androidx.core.net.toUri
+
+private fun sourceIcon(source: String) = when {
+    source.contains("forvo", ignoreCase = true) ||
+    source.contains("pronunciation", ignoreCase = true) -> Icons.AutoMirrored.Outlined.VolumeUp
+    else -> Icons.AutoMirrored.Outlined.MenuBook
+}
 
 @Composable
 fun DictionaryRow(name: String, url: String) {
@@ -32,7 +40,7 @@ fun DictionaryRow(name: String, url: String) {
         modifier = Modifier
             .padding(horizontal = 22.dp, vertical = 4.dp)
             .clickable(onClick = {
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
             }),
     ) {
         Row(
@@ -41,7 +49,7 @@ fun DictionaryRow(name: String, url: String) {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Icon(
-                Icons.Outlined.VolumeUp,
+                sourceIcon(name),
                 contentDescription = null,
                 tint = QalamLapis,
                 modifier = Modifier.size(18.dp),

@@ -1,6 +1,7 @@
 package com.tonihacks.qalam.data.repository
 
 import com.tonihacks.qalam.data.api.ApiClient
+import com.tonihacks.qalam.data.api.dto.DictionaryLinkDto
 import com.tonihacks.qalam.data.api.dto.toDomain
 import com.tonihacks.qalam.data.api.dto.toDto
 import com.tonihacks.qalam.domain.model.DictionaryLink
@@ -36,7 +37,7 @@ class WordRepositoryImpl @Inject constructor(
 
     override suspend fun getDictionaryLinks(baseUrl: String, wordId: String): Result<List<DictionaryLink>> =
         apiClient.getDictionaryLinks(baseUrl, wordId).map { list ->
-            list.map { dto: com.tonihacks.qalam.data.api.dto.DictionaryLinkDto -> dto.toDomain() }
+            list.map { dto: DictionaryLinkDto -> dto.toDomain() }
         }
 
     override suspend fun createWord(baseUrl: String, draft: WordDraft): Result<Word> =
