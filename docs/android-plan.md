@@ -36,63 +36,25 @@ Task runner: `just build` = `./gradlew assembleDebug`. Full recipes in `justfile
 
 ## 🔄 Phase 3 — Words
 
-### 3.1 DTOs
+### ✅ 3.1 DTOs
 
-`data/api/dto/WordDto.kt` — mirror the backend response shape exactly.
-Source of truth: `GET /api/v1/words` response schema in `documentation.yaml`.
+`data/api/dto/WordDto.kt` + `DictionaryLinkDto` + `ExampleDto`. Mapping via `.toDomain()` extension fns.
 
-```kotlin
-@Serializable
-data class WordDto(
-    val id: String,
-    val arabicText: String,
-    val transliteration: String?,
-    val translation: String?,
-    val partOfSpeech: String,
-    val dialect: String,
-    val difficulty: String,
-    val masteryLevel: String,
-    val rootId: String?,
-)
+### ✅ 3.2 Word list screen
 
-@Serializable
-data class PagedResponse<T>(
-    val items: List<T>,
-    val total: Int,
-    val page: Int,
-    val size: Int,
-)
-```
+`ui/words/WordListScreen.kt`: search bar, mastery filter chips, paginated lazy list, `WordListViewModel`.
 
-### 3.2 Word list screen
+### ✅ 3.3 Word detail screen
 
-`ui/words/WordListScreen.kt`:
-- Title "Words" (Newsreader 34sp) + entry count (Newsreader italic)
-- Search bar (surface card, search icon, clear button)
-- Horizontal chip row: All · Unseen · Learning · Reviewing · Mastered
-  - Active chip: mastery color background; inactive: surface
-- Vertical list of word rows:
-  - Left: mastery dot + label + POS, transliteration (italic), translation
-  - Right: Arabic text (Amiri 34sp)
-- Pagination: load more on scroll-to-bottom (`LazyColumn` + `LazyListState`)
-
-ViewModel: `WordListViewModel` holds `StateFlow<WordListUiState>`.
-UiState holds: query, activeFilter, items, isLoading, error, hasMore.
-
-### 3.3 Word detail screen
-
-`ui/words/WordDetailScreen.kt` (layout top-to-bottom):
-
-1. **Top bar**: back arrow (left) + bookmark icon (right, stub for now)
-2. **Hero**: Arabic (Amiri 74sp, centered) + transliteration (Newsreader italic 22sp) + translation (18sp bold)
-3. **Badges**: POS chip + dialect chip (surface-2 background)
-4. **Mastery card**: label + 4-segment progress bar (filled with mastery color up to level)
-5. **Examples section** (uppercase label): cards with Arabic (26sp RTL), transliteration italic, English
-6. **Root link card** (gold-c background): root Arabic + meaning → navigates to Root detail
-7. **Dictionaries section**: list rows with external link icon (open in browser via `Intent`)
-8. **Same root section**: horizontal scroll of sibling word chips → navigate to Word detail
-
-Fetch: `GET /api/v1/words/{id}` + `GET /api/v1/words/{id}/examples` in parallel.
+`ui/words/WordDetailScreen.kt` — all sections implemented:
+1. Top bar (back + bookmark stub)
+2. Hero: Arabic `displayLarge` + transliteration + translation — wrapped in `SelectionContainer` (long-press copy works)
+3. POS + dialect chips
+4. Mastery card (`MasteryCard.kt`)
+5. Examples (`ExampleCard.kt`) — wrapped in `SelectionContainer`
+6. Root link card (gold-c, navigates to Root detail)
+7. Dictionaries: pill chips (`DictionaryRow.kt`) — `VolumeUp` icon for Forvo/pronunciation sources, `MenuBook` for all others; opens browser via `Intent`
+8. Notes — wrapped in `SelectionContainer`
 
 ### 3.4 Quick-add word
 
