@@ -111,7 +111,7 @@ in the Typography scale — applied explicitly via `ArabicText` composable).
 mapped from our tokens to M3 roles. This ensures standard M3 components (Buttons, Chips,
 NavigationBars) automatically adopt the Qalam visual identity. The app is light-only.
 
-### 🔄 1.2 Navigation — **current slice**
+### ✅ 1.2 Navigation — Navigation3 (not navigation-compose 2.x)
 
 **Library decision:** use `androidx.navigation3` (Navigation3), NOT `androidx.navigation:navigation-compose`.
 `navigation-compose` 2.x is in maintenance mode; Navigation3 is the Compose-first replacement, stable at 1.1.3.
@@ -148,7 +148,7 @@ Use type-safe Navigation Compose (2.8+). Define a sealed hierarchy:
 // - floatingActionButton: Train FAB (shown on Home + WordList)
 ```
 
-### ❌ 1.3 Bottom nav component
+### ✅ 1.3 Bottom nav component
 
 `components/QalamBottomNav.kt` — 4 tabs, active/inactive states per design spec.
 Active = filled icon + `primary-c` pill. Inactive = outlined icon only.
@@ -157,7 +157,7 @@ Deliverable: `./gradlew assembleDebug` succeeds, app runs, tabs navigate.
 
 ---
 
-## Phase 2 — Settings + connection layer
+## 🔄 Phase 2 — Settings + connection layer — **next slice**
 
 Goal: user can enter a base URL, app verifies it, shows connection status.
 
