@@ -18,6 +18,7 @@ We operate in **Pair Programming** mode as defined in the `pair-programming` ski
 - **Slicing:** Every task must be broken into small, reviewable slices that advance the product.
 - **Ephemeral Guidance:** For any implementation task, create a walkthrough in `.pairing/<YYYY-MM-DD>-<task-slug>.md`. This file should be technical, concise, and deleted upon task completion.
 - **Teaching calibration:** User is an experienced Kotlin developer (server-side / Ktor / backend). Has **zero prior Android experience**. Explain Android-specific concepts at length in guidance files: the Compose runtime model (`@Composable`, recomposition, slots), Android resource system (`res/font/`, `res/xml/`, naming rules), Activity lifecycle, Hilt/KSP annotation processing, Gradle/AGP conventions, `AndroidManifest.xml` attributes. Skip trivial Kotlin syntax — the user knows it.
+- **Proactive Mentorship:** Since the user is an Android novice, the Agent MUST challenge decisions that deviate from idiomatic Android standards or "senior developer" best practices, suggesting the superior alternative before proceeding.
 - **Human-Commits Rule:** Agents never commit to git. All version control actions are performed by the user.
 
 ## Tech Stack & Quality Gates
