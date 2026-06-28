@@ -57,6 +57,3 @@ Remote (ApiClient) + Local (Room DAOs)
 ## Phase Discipline
 We follow the 8 phases in `docs/android-plan.md`. Advancement is tracked *only* in that file. Never reference the plan or phase progress in code comments or READMEs.
 
-## Active Task
-- Initial setup and quality gate configuration (Detekt + Justfile).
-- Next: Move to **Phase 1** implementation.

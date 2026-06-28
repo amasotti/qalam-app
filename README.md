@@ -1,5 +1,15 @@
 # Qalam Android
 
+[![FreePalestine.Dev](https://freepalestine.dev/badge?t=d&u=1&r=1)](https://freepalestine.dev)
+[![CI](https://github.com/amasotti/qalam-app/actions/workflows/ci.yml/badge.svg)](https://github.com/amasotti/qalam-app/actions/workflows/ci.yml)
+
+![Kotlin](https://img.shields.io/badge/Kotlin-2.4-7F52FF?logo=kotlin&logoColor=white)
+![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)
+![API](https://img.shields.io/badge/API-31%2B-3DDC84?logo=android)
+![Static Analysis](https://img.shields.io/badge/Detekt-v2.0-blueviolet?logo=kotlin)
+![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+![Store](https://img.shields.io/badge/Store-Sideload%20Only-orange)
+
 Native Android companion to [Qalam](https://github.com/amasotti/qalam) — a personal Arabic vocabulary and text study tool.
 Read-heavy, training-focused. Connects to the Ktor backend over Tailscale. No Play Store. Sideloaded only.
 
