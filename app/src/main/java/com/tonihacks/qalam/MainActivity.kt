@@ -4,13 +4,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+
+import com.tonihacks.qalam.navigation.Home
+import com.tonihacks.qalam.navigation.MainNavDisplay
+import com.tonihacks.qalam.navigation.RootList
+import com.tonihacks.qalam.navigation.TextList
+import com.tonihacks.qalam.navigation.WordList
+import com.tonihacks.qalam.ui.components.QalamBottomNav
+import com.tonihacks.qalam.ui.theme.QalamBg
 import com.tonihacks.qalam.ui.theme.QalamTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +25,33 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             QalamTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+                val backStack = remember { mutableStateListOf<Any>(Home) }
+                Scaffold(
+                    containerColor = QalamBg,
+                    bottomBar = {
+                        QalamBottomNav(
+                            currentDst = backStack.lastOrNull(),
+                            onNavigate = { dest ->
+                                // Tab switch: replace the top of the stack with the new root tab.
+                                // This prevents stacking Home→Words→Home→Words ad infinitum.
+                                val tabRoots = listOf(
+                                    Home, WordList,
+                                    RootList, TextList
+                                )
+                                if (dest != backStack.lastOrNull()) {
+                                    backStack.removeAll { it in tabRoots }
+                                    backStack.add(dest)
+                                }
+                            },
+                        )
+                    },
+                ) { innerPadding ->
+                    MainNavDisplay(
+                        backStack = backStack,
+                        modifier = Modifier.padding(innerPadding),
                     )
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    QalamTheme {
-        Greeting("Android")
     }
 }
