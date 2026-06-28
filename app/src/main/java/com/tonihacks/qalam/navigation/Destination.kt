@@ -9,5 +9,6 @@ data class  RootDetail(val rootId: String)   : Destination
 data class  TextDetail(val textId: String)   : Destination
 data object Training    : Destination
 data object TrainingSummary : Destination
+data object Settings: Destination
 
 sealed interface Destination

@@ -20,7 +20,9 @@ import com.tonihacks.qalam.navigation.WordList
 import com.tonihacks.qalam.ui.components.QalamBottomNav
 import com.tonihacks.qalam.ui.theme.QalamBg
 import com.tonihacks.qalam.ui.theme.QalamTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
