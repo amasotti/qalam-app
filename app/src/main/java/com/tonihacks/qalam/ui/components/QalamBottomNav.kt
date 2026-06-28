@@ -16,6 +16,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import com.tonihacks.qalam.navigation.Destination
 import com.tonihacks.qalam.navigation.Home
 import com.tonihacks.qalam.navigation.RootList
@@ -25,6 +26,7 @@ import com.tonihacks.qalam.ui.theme.QalamInk3
 import com.tonihacks.qalam.ui.theme.QalamPaper
 import com.tonihacks.qalam.ui.theme.QalamPrimary
 import com.tonihacks.qalam.ui.theme.QalamPrimaryC
+import com.tonihacks.qalam.ui.theme.QalamTheme
 
 private data class NavItem(
     val destination: Destination,
@@ -67,3 +69,17 @@ fun QalamBottomNav(
         }
     }
 }
+
+@Preview(showBackground = true, backgroundColor = 0xFFF4EEE2)
+@Composable
+private fun QalamBottomNavPreview() {
+    QalamTheme {
+        QalamBottomNav(
+            currentDst = Home,
+            onNavigate = {}
+        )
+    }
+}
+
+@Preview(name = "Words selected", backgroundColor = 0xFFF4EEE2, showBackground = true)
+@Composable private fun PreviewWords() = QalamTheme { QalamBottomNav(WordList) {} }
