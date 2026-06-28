@@ -8,6 +8,7 @@ import com.tonihacks.qalam.ui.home.HomeScreen
 import com.tonihacks.qalam.ui.roots.RootListScreen
 import com.tonihacks.qalam.ui.settings.SettingsScreen
 import com.tonihacks.qalam.ui.texts.TextListScreen
+import com.tonihacks.qalam.ui.words.WordDetailScreen
 import com.tonihacks.qalam.ui.words.WordListScreen
 
 @Composable
@@ -21,7 +22,17 @@ fun MainNavDisplay(
         modifier = modifier,
         entryProvider = entryProvider {
             entry<Home>     { HomeScreen(onNavigateToSettings = { backStack.add(Settings) }) }
-            entry<WordList> { WordListScreen() }
+            entry<WordList> {
+                WordListScreen(onNavigateToWord = { id -> backStack.add(WordDetail(id)) })
+            }
+            entry<WordDetail> { dest ->
+                WordDetailScreen(
+                    wordId = dest.wordId,
+                    onBack = { backStack.removeLastOrNull() },
+                    onNavigateToRoot = { id -> backStack.add(RootDetail(id)) },
+                    onNavigateToWord = { id -> backStack.add(WordDetail(id)) },
+                )
+            }
             entry<RootList> { RootListScreen() }
             entry<TextList> { TextListScreen() }
             entry<Settings> { SettingsScreen(onBack = { backStack.removeLastOrNull() }) }

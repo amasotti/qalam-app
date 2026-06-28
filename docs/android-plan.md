@@ -1,236 +1,36 @@
 # Qalam Android — Implementation Plan
 
-Target reader: an AI agent or developer with no prior Android/Compose experience building 
-this app. Follow phases in order. Each phase ships something runnable.
-
-Companion documents (read before starting):
-- `android-spec.md` — architecture, stack decisions, API contract
-- `android-design.md` — colors, fonts, spacing, screen inventory, interactions
+> **Agent fast-start:** Read `AGENTS.md` → this file (current phase section only) →
+> `docs/android-app.md` (API contract table). Completed phases are decision records —
+> do not read them in full. Read source files on demand, not speculatively.
 
 ---
 
-## Prerequisites
-
-```bash
-# Install Android Studio (includes SDK, emulator, adb)
-# https://developer.android.com/studio
-# After install, create one AVD: Pixel 7 / API 35
-
-# Verify tools
-adb version
-./gradlew --version   # inside project root after creation
-```
-
-Minimum SDK: 29. Target SDK: 35. Language: Kotlin 2.x. Build system: Gradle (Kotlin DSL).
+## ✅ Phase 0 — Project bootstrap
+Package `com.tonihacks.qalam`, minSdk 31, targetSdk 37, Kotlin 2.4.0, JVM 17.
+Compose BOM `2026.06.00`. Gradle Kotlin DSL. Version catalog: `gradle/libs.versions.toml`.
+Fonts in `res/font/`: HankenGrotesk (full weight range), Newsreader, Amiri.
+Task runner: `just build` = `./gradlew assembleDebug`. Full recipes in `justfile`.
 
 ---
 
-## Phase 0 — Project bootstrap
-
-### ✅ 0.1 Create project
-
-In Android Studio: **New Project → Empty Activity** (Compose template).
-- Package name: `com.toni.qalam`
-- Save location: new `qalam-android/` repo
-- Language: Kotlin
-- Min SDK: 29
-
-### ✅ 0.2 Version catalog
-
-`gradle/libs.versions.toml` exists with Compose BOM, basic Compose deps, and detekt.
-Grows incrementally — new entries are added at the start of the phase that first needs them.
-
-### ✅ 0.3 app/build.gradle.kts — minimal Compose skeleton
-
-Current actual state — only what is wired and needed right now:
-
-```kotlin
-plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.detekt)
-}
-
-android {
-    namespace = "com.tonihacks.qalam"
-    compileSdk = 36
-    defaultConfig {
-        applicationId = "com.tonihacks.qalam"
-        minSdk = 31
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    buildFeatures { compose = true }
-}
-
-kotlin { jvmToolchain(17) }
-
-dependencies {
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-}
-```
-
-### ✅ 0.4 Fonts — res/font/ + Type.kt complete
-
-Download and add to `app/src/main/res/font/`:
-- `hanken_grotesk_regular.ttf`, `_medium.ttf`, `_semibold.ttf`, `_bold.ttf`
-- `newsreader_regular.ttf`, `_italic.ttf`
-- `amiri_regular.ttf`, `_bold.ttf`
-
-Material Symbols: use `androidx.compose.material:material-icons-extended` (added in Phase 1.2
-alongside navigation deps). For `account_tree` (roots) — verify it's in the extended set;
-if not, use SVG vector drawable.
-
----
-
-## Phase 1 — Theme + skeleton navigation
-
-Goal: app launches, shows bottom nav, can switch between 4 empty screens. We use **Material 3** 
-as the foundation, overriding its defaults with our design tokens.
-
-### ✅ 1.1 Theme (`ui/theme/`) — Color.kt · Theme.kt · Type.kt complete
-
-**Color.kt** — define every token from `android-design.md` as a named `Color`.
-
-**Type.kt** — define `Typography` using the three font families. Map them to M3 roles
-(Newsreader → display/headline; Hanken Grotesk → title/body/label; Amiri declared but not
-in the Typography scale — applied explicitly via `ArabicText` composable).
-
-**Theme.kt** — `QalamTheme` wraps content in `MaterialTheme` with a custom `ColorScheme`
-mapped from our tokens to M3 roles. This ensures standard M3 components (Buttons, Chips,
-NavigationBars) automatically adopt the Qalam visual identity. The app is light-only.
-
-### ✅ 1.2 Navigation — Navigation3 (not navigation-compose 2.x)
-
-**Library decision:** use `androidx.navigation3` (Navigation3), NOT `androidx.navigation:navigation-compose`.
-`navigation-compose` 2.x is in maintenance mode; Navigation3 is the Compose-first replacement, stable at 1.1.3.
-
-**Build setup (do this first):** add to `libs.versions.toml` and wire into `build.gradle.kts`:
-- Plugin: `kotlin-serialization` (`org.jetbrains.kotlin.plugin.serialization`) — inert now, needed in Phase 2 for Ktor. Do NOT add `kotlin-android` — AGP 9 applies it internally; explicit declaration causes a classpath conflict.
-- Lib: `navigation3-runtime` + `navigation3-ui` (`androidx.navigation3`, v1.1.3)
-- Lib: `compose-icons-extended` (material-icons-extended, used by bottom nav + throughout app)
-- No `kotlin-serialization` or `kotlinx-serialization-json` yet — Navigation3 doesn't require `@Serializable` on destinations. Serialization arrives in Phase 2 with Ktor.
-
-Use type-safe Navigation Compose (2.8+). Define a sealed hierarchy:
-
-```kotlin
-// navigation/Destination.kt
-@Serializable object Home
-@Serializable object WordList
-@Serializable data class WordDetail(val wordId: String)
-@Serializable object RootList
-@Serializable data class RootDetail(val rootId: String)
-@Serializable object TextList
-@Serializable data class TextDetail(val textId: String)
-@Serializable object Training
-@Serializable object TrainingSummary  // carries result via ViewModel, not nav args
-```
-
-**MainNavHost.kt** — `NavHost` with one composable per destination.
-`MainActivity.kt` — single activity, hosts the scaffold:
-
-```kotlin
-// Scaffold structure:
-// - topBar: none (screens manage their own top area)
-// - bottomBar: QalamBottomNav (hidden on Training / Summary)
-// - content: NavHost
-// - floatingActionButton: Train FAB (shown on Home + WordList)
-```
-
-### ✅ 1.3 Bottom nav component
-
-`components/QalamBottomNav.kt` — 4 tabs, active/inactive states per design spec.
-Active = filled icon + `primary-c` pill. Inactive = outlined icon only.
-
-Deliverable: `./gradlew assembleDebug` succeeds, app runs, tabs navigate.
+## ✅ Phase 1 — Theme + navigation
+`QalamTheme` wraps `MaterialTheme` with Qalam color tokens + custom `Typography`. Light-only.
+**Navigation3** (`androidx.navigation3:1.1.3`) — NOT `navigation-compose` (maintenance mode).
+`Destination` sealed interface in `navigation/Destination.kt`; entries are `data object`/`data class`, no `@Serializable`.
+`backStack: SnapshotStateList<Any>` owned by `MainActivity`. Screens receive typed nav lambdas — never touch backStack directly.
+`QalamBottomNav`: 4 tabs (Home, Words, Roots, Texts), filled/outlined icon toggle, `QalamPrimaryC` indicator pill.
+`enableEdgeToEdge(statusBarStyle = SystemBarStyle.light(...))` required — without it, system icons are invisible on parchment background.
 
 ---
 
 ## ✅ Phase 2 — Settings + connection layer
-
-Goal: user can enter a base URL, app verifies it, shows connection status.
-
-**✅ Build setup:** add to `libs.versions.toml` and wire into `build.gradle.kts`:
-- Plugin: `hilt` (`com.google.dagger.hilt.android`) + `ksp` (`com.google.devtools.ksp`)
-  — Hilt is Android's DI framework built on Dagger; KSP is the annotation processor that generates its code
-- Lib: `hilt-android` + `hilt-android-compiler` (ksp) + `hilt-navigation-compose`
-- Lib: `ktor-client-core`, `ktor-client-android`, `ktor-client-content-negotiation`,
-  `ktor-serialization-kotlinx-json`, `ktor-client-logging`
-- Lib: `datastore-preferences`
-- Also add `@HiltAndroidApp` annotation to `QalamApp : Application` (new file) and register
-  it in `AndroidManifest.xml` — Hilt requires an annotated Application class as its root.
-
-**Network security config (deferred from Phase 0):**
-
-`app/src/main/res/xml/network_security_config.xml`:
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<network-security-config>
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">ts.net</domain>
-        <domain includeSubdomains="false">10.0.2.2</domain>
-    </domain-config>
-</network-security-config>
-```
-
-`AndroidManifest.xml` additions:
-```xml
-<uses-permission android:name="android.permission.INTERNET" />
-<application
-    android:name=".QalamApp"
-    android:networkSecurityConfig="@xml/network_security_config"
-    ...>
-```
-
-### ✅ 2.1 DataStore
-
-`data/local/PreferencesRepository.kt`:
-```kotlin
-val baseUrl: Flow<String>   // default: "http://100.x.x.x:8080"
-suspend fun setBaseUrl(url: String)
-```
-
-### ✅ 2.2 Ktor client
-
-`data/api/QalamHttpClient.kt`:
-```kotlin
-fun buildHttpClient(): HttpClient = HttpClient(Android) {
-    install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
-    install(Logging) { level = LogLevel.HEADERS }
-    // timeout: connect 5s, request 15s
-}
-```
-
-Client receives `baseUrl` as a parameter at call time (not injected at construction),
-because the user can change it in settings.
-
-`data/api/ApiClient.kt` — wraps all endpoint calls, returns `Result<T>`.
-All calls catch `IOException` and `HttpException` → `Result.failure(...)`.
-
-### ✅ 2.3 Settings screen
-
-`ui/settings/SettingsScreen.kt`:
-- Text field: base URL input (pre-filled from DataStore)
-- "Test connection" button → `GET /api/v1/analytics/overview` → show ✓ or error
-- Save button writes to DataStore
-
-### ✅ 2.4 Connection indicator on Home
-
-Home screen top-right: pulsing green dot + "MacBook" label (or "Offline" + terra dot).
-Driven by a `SettingsViewModel` that pings the API every time the app foregrounds.
-
-Deliverable: can enter `http://100.x.x.x:8080`, test connection, save.
+**DI:** Hilt 2.60 + KSP 2.3.9. `QalamApp : Application` annotated `@HiltAndroidApp`. `MainActivity` annotated `@AndroidEntryPoint` — required for `hiltViewModel()` to work in any hosted composable.
+**Network:** `<base-config cleartextTrafficPermitted="true"/>` — domain-config insufficient for raw Tailscale IPs; Tailscale is the security perimeter.
+**DataStore:** `PreferencesRepository` — `val baseUrl: Flow<String>`, `suspend fun setBaseUrl(String)`. Default URL in `DEFAULT_URL` companion const.
+**HTTP:** `ApiClient` `@Singleton @Inject constructor(HttpClient)`. Client built with `HttpClient(Android)`, `expectSuccess=true`, `ignoreUnknownKeys=true`. Connection test hits `GET /health` (not analytics endpoint). `baseUrl` passed at call time, not injected into client.
+**Settings:** `SettingsViewModel` (`@HiltViewModel`) — `urlDraft: StateFlow<String>` seeded once from DataStore in `init`, `connectionStatus: StateFlow<ConnectionStatus>`, `testConnection()` + `saveUrl()`.
+**Home indicator:** `HomeViewModel` pings `/health` via `repeatOnLifecycle(Lifecycle.State.STARTED)`. Pulsing `QalamPrimary` dot (online) or steady `QalamTerra` dot (offline). Hostname via `String.toUri().host`. `Settings` destination accessible from Home gear icon; back via `backStack.removeLastOrNull()` lambda.
 
 ---
 
@@ -471,24 +271,13 @@ Use `@Database`, `@Entity`, `@Dao` — Room annotation processor (KSP).
 ### 8.3 Build & install
 
 ```bash
-# USB install
-./gradlew assembleDebug
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-
-# Wireless (phone and laptop on same Tailscale network)
-# On phone: Developer Options → Wireless debugging → pair
-adb pair <ip>:<port>   # use pairing code shown on phone
-adb connect <ip>:<port>
-adb install app/build/outputs/apk/debug/app-debug.apk
+just build    # assembleDebug
+just install  # build + adb install
+just run      # build + install + launch
+just pair IP PORT   # wireless ADB pairing
+just connect IP PORT
 ```
-
-Enable on phone: Settings → About phone → tap Build Number 7× → Developer Options →
-USB Debugging + Wireless Debugging (for wireless). Install Unknown Apps not needed for ADB.
 
 ### 8.4 Build variants
 
-`buildTypes` in `build.gradle.kts`:
-- `debug`: default, debuggable, no proguard
-- `release`: minified, no debuggable flag. Sign with a local keystore.
-
-For personal sideloaded use, debug is sufficient indefinitely.
+`debug`: default, debuggable. `release`: minified, signed. For personal sideloaded use, debug is sufficient.
