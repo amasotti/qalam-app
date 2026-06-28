@@ -1,36 +1,60 @@
-# Project Steering: qalam-app
+# Project Steering: Qalam Android
 
-This file guides AI agents collaborating on the `qalam-app` project. It complements the global guidelines in `~/.claude/CLAUDE.md`.
+This file acts as the primary source of truth for AI agents (Claude, Gemini, etc.) collaborating on the `qalamapp` project. It defines the architecture, design tokens, and collaboration protocols.
 
 ## Project Context
-- **Name:** qalam-app
-- **Purpose:** Android application (details to be discovered as we build).
-- **Structure:** Single sub-project `:app` (Android App).
-
-## Tech Stack
-- **Language:** Kotlin (JVM 17 target, 2.4.0 plugin).
-- **UI Framework:** Jetpack Compose (Compose BOM 2026.02.01).
-- **Build System:** Gradle with Kotlin DSL and Version Catalogs (`libs.versions.toml`).
-- **Minimum SDK:** 31 (Android 12).
-- **Target SDK:** 36 (Android 15 / Vanilla Ice Cream).
-
-## Quality Gates & Tooling
-- **Linting:** `detekt` is mandatory for Kotlin code. Run it before suggesting completion of a slice.
-- **Testing:** JUnit 4 for unit tests, Espresso and Compose UI Test for instrumentation.
-- **Task Runner:** `just` (via `justfile`).
+- **Purpose:** Personal Arabic learning app (Qalam).
+- **Core Goal:** Master Arabic vocabulary and grammar through a structured, visual, and high-quality UI.
+- **Environment:** Connects to a Ktor backend via Tailscale. No auth required (perimeter security).
+- **Primary References:**
+    - Full Spec: `docs/android-app.md`
+    - Design Tokens: `docs/android-design.md`
+    - Build Plan: `docs/android-plan.md`
+    - Visual Source of Truth: `wireframe/Qalam.dc.html`
 
 ## Collaboration Mode: Pair Programming
-We operate primarily in **Pair Programming** mode as defined in the `pair-programming` skill.
-- **Default Mode:** Coach mode (User writes, Agent guides).
-- **Slicing:** Work in small, reviewable slices.
-- **Guidance:** Create ephemeral guidance files in `.pairing/<YYYY-MM-DD>-<task-slug>.md` for implementation tasks.
-- **Teaching:** Explain genuinely new or domain-specific concepts (2-4 sentences). Skip the trivial.
+We operate in **Pair Programming** mode as defined in the `pair-programming` skill. 
+- **Default Mode:** **Coach mode** (User writes, Agent guides). The Agent should only "Take Over" a slice if explicitly requested.
+- **Slicing:** Every task must be broken into small, reviewable slices that advance the product.
+- **Ephemeral Guidance:** For any implementation task, create a walkthrough in `.pairing/<YYYY-MM-DD>-<task-slug>.md`. This file should be technical, concise, and deleted upon task completion.
+- **Teaching:** When introducing genuinely new or domain-specific concepts, provide a 2-4 sentence explanation. Skip trivial programming concepts.
+- **Human-Commits Rule:** Agents never commit to git. All version control actions are performed by the user.
 
-## Knowledge Base & Conventions
-- **Clean Architecture:** Prefer separation of concerns (UI, Domain, Data) as the project grows.
-- **Modern Android:** Follow Material 3 guidelines and Compose best practices.
-- **Version Control:** Human-commits rule (Agent never commits).
+## Tech Stack & Quality Gates
+- **Language:** Kotlin 2.4.0 (JVM 17 toolchain).
+- **UI:** Jetpack Compose (BOM 2026.02.01) with Material 3.
+- **Target SDK:** 36 (Android 15) / **Min SDK:** 31.
+- **Build System:** Gradle (Kotlin DSL) + Version Catalogs.
+- **Task Runner:** `just` (see `justfile` for `lint`, `detekt`, `check`, `build`).
+- **Static Analysis:** `detekt` (v2.0.0-alpha.5) is mandatory. Run `just detekt` before finishing a slice.
+- **Testing:** JUnit 4 (Unit), Compose UI Test (Instrumentation).
+
+## Architecture — Non-Negotiable Layer Rules
+```
+UI (Composables + ViewModels)
+    ↓
+Repository interfaces  ← Domain layer, zero Android dependencies
+    ↓
+Remote (ApiClient) + Local (Room DAOs)
+```
+- **ViewModels:** Expose `StateFlow<SealedUiState>` (e.g., `Loading / Success / Error`).
+- **Composables:** Must be stateless. Observe state, dispatch events, no business logic.
+- **DTOs:** Live in `data/api/dto/`. Never leak into UI or domain layers.
+- **Domain Models:** Live in `domain/model/`. Pure Kotlin, no framework imports.
+- **DI:** Hilt is mandatory. Bind implementations in `di/RepositoryModule.kt`.
+- **API:** Base URL from DataStore (never hardcoded). Derive DTOs from `GET /api/v1/openapi.json`.
+
+## UI — Design & Arabic Rules
+- **Palette:** Warm parchment (see `docs/android-design.md`). Do not use Material3 defaults.
+- **Fonts:** Hanken Grotesk (UI), Newsreader (Prose), **Amiri (Arabic)**.
+- **Arabic Handling:** Always use `layoutDirection = LayoutDirection.Rtl`, Amiri font, `fontSize >= 24.sp`.
+- **Mastery Colors:** 
+    - Unseen: `#A99F8B` | Learning: `#B07D26` | Reviewing: `#2F6E9E` | Mastered: `#1F6F5C`
+- **Light Mode Only:** No dark theme support.
+
+## Phase Discipline
+We follow the 8 phases in `docs/android-plan.md`. Advancement is tracked *only* in that file. Never reference the plan or phase progress in code comments or READMEs.
 
 ## Active Task
-- Initial setup and steering definition.
-- Next: Explore project requirements and define the first feature slice.
+- Initial setup and quality gate configuration (Detekt + Justfile).
+- Next: Move to **Phase 1** implementation.
