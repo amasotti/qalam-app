@@ -56,7 +56,7 @@ Task runner: `just build` = `./gradlew assembleDebug`. Full recipes in `justfile
 7. Dictionaries: pill chips (`DictionaryRow.kt`) — `VolumeUp` icon for Forvo/pronunciation sources, `MenuBook` for all others; opens browser via `Intent`
 8. Notes — wrapped in `SelectionContainer`
 
-### 3.4 Quick-add word
+### 🔄 3.4 Quick-add word
 
 FAB long-press or dedicated "+" button on Word list top bar opens a bottom sheet:
 - Required: Arabic text field (RTL input), translation

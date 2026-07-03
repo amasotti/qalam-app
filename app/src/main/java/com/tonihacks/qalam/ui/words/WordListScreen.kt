@@ -153,10 +153,11 @@ fun WordListScreen(
 
     if (showAddSheet) {
         AddWordSheet(
+            isSaving = uiState.isCreating,
+            errorMessage = uiState.createWordError,
             onDismiss = { showAddSheet = false },
             onSave = { draft ->
-                viewModel.createWord(draft)
-                showAddSheet = false
+                viewModel.createWord(draft) { showAddSheet = false }
             },
         )
     }

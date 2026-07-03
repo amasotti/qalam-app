@@ -3,7 +3,9 @@ package com.tonihacks.qalam.ui.words
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tonihacks.qalam.data.local.PreferencesRepository
-import com.tonihacks.qalam.domain.model.*
+import com.tonihacks.qalam.domain.model.MasteryLevel
+import com.tonihacks.qalam.domain.model.Word
+import com.tonihacks.qalam.domain.model.WordDraft
 import com.tonihacks.qalam.domain.repository.WordRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,11 +19,13 @@ import javax.inject.Inject
 data class WordListUiState(
     val items: List<Word> = emptyList(),
     val query: String = "",
-    val activeFilter: MasteryLevel? = null,   // null = "All"
+    val activeFilter: MasteryLevel? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
     val hasMore: Boolean = true,
-    val currentPage: Int = 1,   // API is 1-based
+    val currentPage: Int = 1,
+    val isCreating: Boolean = false,
+    val createWordError: String? = null
 )
 
 @HiltViewModel
@@ -33,7 +37,9 @@ class WordListViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(WordListUiState())
     val uiState: StateFlow<WordListUiState> = _uiState.asStateFlow()
 
-    init { load() }
+    init {
+        load()
+    }
 
     fun onQueryChange(q: String) {
         _uiState.update { it.copy(query = q, items = emptyList(), currentPage = 1, hasMore = true) }
@@ -53,13 +59,29 @@ class WordListViewModel @Inject constructor(
         load()
     }
 
-    fun createWord(draft: WordDraft) {
+    fun createWord(draft: WordDraft, onCreated: () -> Unit) {
         viewModelScope.launch {
+            _uiState.update { it.copy(isCreating = true, createWordError = null) }
             val baseUrl = prefs.baseUrl.first()
-            wordRepository.createWord(baseUrl, draft).onSuccess {
-                _uiState.update { it.copy(items = emptyList(), currentPage = 1, hasMore = true) }
-                load()
-            }
+            wordRepository.createWord(baseUrl, draft).fold(
+                onSuccess = {
+                    _uiState.update {
+                        it.copy(
+                            items = emptyList(),
+                            currentPage = 1,
+                            hasMore = true,
+                            isCreating = false,
+                            createWordError = null
+                        )
+                    }
+                    onCreated()
+                    load()
+                },
+                onFailure = { err ->
+                    val errMsg = err.message ?: "Failed to add word"
+                    _uiState.update { it.copy(isCreating = false, createWordError = errMsg) }
+                }
+            )
         }
     }
 
