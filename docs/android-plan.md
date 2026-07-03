@@ -34,42 +34,14 @@ Task runner: `just build` = `./gradlew assembleDebug`. Full recipes in `justfile
 
 ---
 
-## 🔄 Phase 3 — Words
-
-### ✅ 3.1 DTOs
-
-`data/api/dto/WordDto.kt` + `DictionaryLinkDto` + `ExampleDto`. Mapping via `.toDomain()` extension fns.
-
-### ✅ 3.2 Word list screen
-
-`ui/words/WordListScreen.kt`: search bar, mastery filter chips, paginated lazy list, `WordListViewModel`.
-
-### ✅ 3.3 Word detail screen
-
-`ui/words/WordDetailScreen.kt` — all sections implemented:
-1. Top bar (back + bookmark stub)
-2. Hero: Arabic `displayLarge` + transliteration + translation — wrapped in `SelectionContainer` (long-press copy works)
-3. POS + dialect chips
-4. Mastery card (`MasteryCard.kt`)
-5. Examples (`ExampleCard.kt`) — wrapped in `SelectionContainer`
-6. Root link card (gold-c, navigates to Root detail)
-7. Dictionaries: pill chips (`DictionaryRow.kt`) — `VolumeUp` icon for Forvo/pronunciation sources, `MenuBook` for all others; opens browser via `Intent`
-8. Notes — wrapped in `SelectionContainer`
-
-### 🔄 3.4 Quick-add word
-
-FAB long-press or dedicated "+" button on Word list top bar opens a bottom sheet:
-- Required: Arabic text field (RTL input), translation
-- Optional: transliteration, POS selector, dialect selector
-- "Save" → `POST /api/v1/words` → close sheet, refresh list
-
-Deliverable: can browse, search/filter words, view detail, add a word.
+## ✅ Phase 3 — Words
+Implemented the words vertical end to end: API DTOs and domain mapping, repository methods, list/search/filter with pagination, detail view with examples/dictionary links/root navigation, and quick-add via `POST /api/v1/words`. Quick-add uses an M3 bottom sheet with RTL Amiri Arabic input, required Arabic + translation fields per product plan, optional transliteration, POS/dialect selectors backed by backend enum values, save loading state, and visible failure handling that keeps the sheet open. OpenAPI was checked for word endpoints; `CreateWordRequest` only requires `arabicText`, but the Android UI intentionally keeps translation required for the learner workflow.
 
 ---
 
-## Phase 4 — Roots
+## 🔄 Phase 4 — Roots
 
-### 4.1 Root list screen
+### 🔄 4.1 Root list screen
 
 `ui/roots/RootListScreen.kt`:
 - Title "Roots" + count + subtitle text ("The skeleton of the language…")

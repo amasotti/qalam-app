@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.sp
 import com.tonihacks.qalam.domain.model.Dialect
 import com.tonihacks.qalam.domain.model.PartOfSpeech
 import com.tonihacks.qalam.domain.model.WordDraft
-import com.tonihacks.qalam.ui.theme.QalamPaper
 import com.tonihacks.qalam.ui.theme.Amiri
+import com.tonihacks.qalam.ui.theme.QalamPaper
 import com.tonihacks.qalam.ui.theme.QalamTerra
 import com.tonihacks.qalam.ui.theme.Typography
 
@@ -70,7 +70,7 @@ fun AddWordSheet(
                 textStyle = LocalTextStyle.current.copy(
                     textDirection = Rtl,
                     fontFamily = Amiri,
-                    fontSize = 24.sp
+                    fontSize = 24.sp,
                 ),
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                     imeAction = androidx.compose.ui.text.input.ImeAction.Next,
@@ -104,14 +104,14 @@ fun AddWordSheet(
                 label = "Part of speech",
                 value = partOfSpeech,
                 options = PartOfSpeech.entries.map { it.name },
-                onValueChange = { partOfSpeech = it }
+                onValueChange = { partOfSpeech = it },
             )
 
             OptionDropdown(
                 label = "Dialect",
                 value = dialect,
                 options = Dialect.entries.map { it.name },
-                onValueChange = { dialect = it }
+                onValueChange = { dialect = it },
             )
 
             errorMessage?.let {
@@ -130,7 +130,7 @@ fun AddWordSheet(
                             translation = translation.trim(),
                             transliteration = transliteration.trim().ifBlank { null },
                             partOfSpeech = partOfSpeech,
-                            dialect = dialect
+                            dialect = dialect,
                         )
                     )
                 },
@@ -139,7 +139,11 @@ fun AddWordSheet(
                 shape = RoundedCornerShape(18.dp),
             ) {
                 if (isSaving) {
-                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = QalamPaper)
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = QalamPaper,
+                    )
                 } else {
                     Text("Save")
                 }
@@ -155,14 +159,14 @@ private fun OptionDropdown(
     value: String,
     options: List<String>,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
-        modifier = modifier
+        modifier = modifier,
     ) {
         OutlinedTextField(
             value = value,
@@ -172,12 +176,12 @@ private fun OptionDropdown(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, true)
                 .fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
         )
 
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
@@ -185,7 +189,7 @@ private fun OptionDropdown(
                     onClick = {
                         onValueChange(option)
                         expanded = false
-                    }
+                    },
                 )
             }
         }
