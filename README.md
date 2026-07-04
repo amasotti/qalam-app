@@ -16,6 +16,7 @@ over Tailscale (no Play Store, sideloaded only).
 
 ## Screenshots
 
+<div align="center">
 <table>
   <tr>
     <td align="center"><img src="docs/assets/home_screen.png" width="220"/><br/><sub>Home</sub></td>
@@ -26,6 +27,7 @@ over Tailscale (no Play Store, sideloaded only).
     <td align="center"><img src="docs/assets/training_card.png" width="220"/><br/><sub>Training / SRS</sub></td>
   </tr>
 </table>
+</div>
 
 ## What it does
 
