@@ -148,5 +148,28 @@ class WordListViewModelTest {
 
         override suspend fun createWord(baseUrl: String, draft: WordDraft): Result<Word> =
             error("not stubbed")
+
+        override suspend fun saveExample(
+            baseUrl: String,
+            wordId: String,
+            example: AiExample
+        ): Result<Example> {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun generateExamples(
+            baseUrl: String,
+            wordId: String
+        ): Result<List<AiExample>> {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun generateInsight(
+            baseUrl: String,
+            entityType: String,
+            entityId: String
+        ): Result<String> {
+            TODO("Not yet implemented")
+        }
     }
 }

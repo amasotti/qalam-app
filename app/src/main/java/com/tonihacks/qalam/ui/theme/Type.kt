@@ -26,11 +26,11 @@ val HankenGrotesk = FontFamily(
     Font(R.font.hanken_grotesk_thin, FontWeight.Thin),
 )
 
-val Amiri = FontFamily(
-    Font(R.font.amiri_bold, FontWeight.Bold),
-    Font(R.font.amiri_bolditalic, FontWeight.Bold, FontStyle.Italic),
-    Font(R.font.amiri_italic, FontWeight.Normal, FontStyle.Italic),
-    Font(R.font.amiri_regular, FontWeight.Normal),
+val NotoNaskh = FontFamily(
+    Font(R.font.notonaskh_bold, FontWeight.Bold),
+    Font(R.font.notonaskh_regular, FontWeight.Normal),
+    Font(R.font.notonaskh_semibold, FontWeight.SemiBold),
+    Font(R.font.notonaskh_medium, FontWeight.Medium),
 )
 
 val NewsReader = FontFamily(

@@ -56,8 +56,8 @@ import com.tonihacks.qalam.domain.model.TextSentence
 import com.tonihacks.qalam.domain.model.TextToken
 import com.tonihacks.qalam.domain.model.WordDraft
 import com.tonihacks.qalam.ui.words.AddWordSheet
-import com.tonihacks.qalam.ui.theme.Amiri
 import com.tonihacks.qalam.ui.theme.NewsReader
+import com.tonihacks.qalam.ui.theme.NotoNaskh
 import com.tonihacks.qalam.ui.theme.QalamInk
 import com.tonihacks.qalam.ui.theme.QalamInk2
 import com.tonihacks.qalam.ui.theme.QalamLapis
@@ -144,7 +144,7 @@ private fun TextReaderContent(
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                         Text(
                             text = text.arabicPreview(),
-                            style = TextStyle(fontFamily = Amiri, fontSize = 32.sp, lineHeight = 42.sp),
+                            style = TextStyle(fontFamily = NotoNaskh, fontSize = 32.sp, lineHeight = 42.sp),
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
@@ -210,7 +210,7 @@ private fun TextReaderContent(
                         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                             Text(
                                 text = text.body.replace("\n", " "),
-                                style = TextStyle(fontFamily = Amiri, fontSize = 34.sp, lineHeight = 52.sp),
+                                style = TextStyle(fontFamily = NotoNaskh, fontSize = 34.sp, lineHeight = 52.sp),
                                 modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp),
                             )
                         }
@@ -301,7 +301,7 @@ private fun TokenCell(token: TextToken, onClick: () -> Unit) {
             .padding(horizontal = 6.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(token.arabic, style = TextStyle(fontFamily = Amiri, fontSize = 30.sp), textAlign = TextAlign.Center)
+        Text(token.arabic, style = TextStyle(fontFamily = NotoNaskh, fontSize = 30.sp), textAlign = TextAlign.Center)
         token.transliteration?.let {
             Text(
                 it,
@@ -335,7 +335,7 @@ private fun TokenBottomSheet(
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                 Text(
                     text = token.arabic,
-                    style = TextStyle(fontFamily = Amiri, fontSize = 52.sp),
+                    style = TextStyle(fontFamily = NotoNaskh, fontSize = 52.sp),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )

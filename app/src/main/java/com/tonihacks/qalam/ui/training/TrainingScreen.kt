@@ -65,7 +65,7 @@ import com.tonihacks.qalam.domain.model.Example
 import com.tonihacks.qalam.domain.model.FlashcardSide
 import com.tonihacks.qalam.domain.model.TrainingWord
 import com.tonihacks.qalam.domain.model.TrainingWordRelation
-import com.tonihacks.qalam.ui.theme.Amiri
+import com.tonihacks.qalam.ui.theme.NotoNaskh
 import com.tonihacks.qalam.ui.theme.QalamBg
 import com.tonihacks.qalam.ui.theme.QalamInk
 import com.tonihacks.qalam.ui.theme.QalamInk2
@@ -590,7 +590,7 @@ private fun ArabicText(
             text = text,
             modifier = modifier,
             style = Typography.displaySmall.copy(
-                fontFamily = Amiri,
+                fontFamily = NotoNaskh,
                 fontSize = 42.sp,
                 lineHeight = 56.sp,
             ),
@@ -645,7 +645,7 @@ private fun ExampleList(examples: List<Example>) {
                     Text(
                         text = example.arabicText,
                         modifier = Modifier.fillMaxWidth(),
-                        style = Typography.bodyLarge.copy(fontFamily = Amiri, fontSize = 24.sp),
+                        style = Typography.bodyLarge.copy(fontFamily = NotoNaskh, fontSize = 24.sp),
                         color = QalamInk,
                         textAlign = TextAlign.Start,
                     )

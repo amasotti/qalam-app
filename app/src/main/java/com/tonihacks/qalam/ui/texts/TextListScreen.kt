@@ -41,8 +41,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonihacks.qalam.domain.model.Dialect
 import com.tonihacks.qalam.domain.model.TextPassage
-import com.tonihacks.qalam.ui.theme.Amiri
 import com.tonihacks.qalam.ui.theme.NewsReader
+import com.tonihacks.qalam.ui.theme.NotoNaskh
 import com.tonihacks.qalam.ui.theme.QalamInk
 import com.tonihacks.qalam.ui.theme.QalamInk2
 import com.tonihacks.qalam.ui.theme.QalamLapis
@@ -150,7 +150,7 @@ private fun TextRow(text: TextPassage, onClick: () -> Unit) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             Text(
                 text = text.arabicPreview(),
-                style = TextStyle(fontFamily = Amiri, fontSize = 30.sp, lineHeight = 40.sp),
+                style = TextStyle(fontFamily = NotoNaskh, fontSize = 30.sp, lineHeight = 40.sp),
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = 1,
             )

@@ -36,8 +36,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonihacks.qalam.domain.model.RootListItem
-import com.tonihacks.qalam.ui.theme.Amiri
 import com.tonihacks.qalam.ui.theme.NewsReader
+import com.tonihacks.qalam.ui.theme.NotoNaskh
 import com.tonihacks.qalam.ui.theme.QalamGold
 import com.tonihacks.qalam.ui.theme.QalamInk
 import com.tonihacks.qalam.ui.theme.QalamInk2
@@ -154,7 +154,7 @@ private fun RootRow(item: RootListItem, onClick: () -> Unit) {
                 Text(
                     text = item.root.displayForm,
                     style = TextStyle(
-                        fontFamily = Amiri,
+                        fontFamily = NotoNaskh,
                         fontSize = 38.sp,
                         lineHeight = 46.sp,
                         letterSpacing = 6.sp,

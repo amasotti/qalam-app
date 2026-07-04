@@ -49,8 +49,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonihacks.qalam.domain.model.Root
 import com.tonihacks.qalam.domain.model.Word
 import com.tonihacks.qalam.ui.components.MarkdownText
-import com.tonihacks.qalam.ui.theme.Amiri
 import com.tonihacks.qalam.ui.theme.NewsReader
+import com.tonihacks.qalam.ui.theme.NotoNaskh
 import com.tonihacks.qalam.ui.theme.QalamGold
 import com.tonihacks.qalam.ui.theme.QalamGoldC
 import com.tonihacks.qalam.ui.theme.QalamInk
@@ -165,7 +165,7 @@ private fun RootHero(root: Root, formCount: Int) {
                     Text(
                         text = root.displayForm,
                         style = TextStyle(
-                            fontFamily = Amiri,
+                            fontFamily = NotoNaskh,
                             fontSize = 62.sp,
                             lineHeight = 72.sp,
                             letterSpacing = 10.sp,
@@ -231,7 +231,7 @@ private fun DerivationRow(word: Word, onClick: () -> Unit) {
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                 Text(
                     text = word.arabicText,
-                    style = TextStyle(fontFamily = Amiri, fontSize = 30.sp, lineHeight = 38.sp),
+                    style = TextStyle(fontFamily = NotoNaskh, fontSize = 30.sp, lineHeight = 38.sp),
                     color = QalamInk,
                     modifier = Modifier.fillMaxWidth(),
                 )

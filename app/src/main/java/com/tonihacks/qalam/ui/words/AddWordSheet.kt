@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.tonihacks.qalam.domain.model.Dialect
 import com.tonihacks.qalam.domain.model.PartOfSpeech
 import com.tonihacks.qalam.domain.model.WordDraft
-import com.tonihacks.qalam.ui.theme.Amiri
+import com.tonihacks.qalam.ui.theme.NotoNaskh
 import com.tonihacks.qalam.ui.theme.QalamPaper
 import com.tonihacks.qalam.ui.theme.QalamTerra
 import com.tonihacks.qalam.ui.theme.Typography
@@ -73,7 +73,7 @@ fun AddWordSheet(
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = LocalTextStyle.current.copy(
                     textDirection = Rtl,
-                    fontFamily = Amiri,
+                    fontFamily = NotoNaskh,
                     fontSize = 24.sp,
                 ),
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(

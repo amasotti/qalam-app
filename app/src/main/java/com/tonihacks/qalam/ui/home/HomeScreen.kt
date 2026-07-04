@@ -59,9 +59,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.tonihacks.qalam.domain.model.MasteryLevel
 import com.tonihacks.qalam.domain.model.Word
-import com.tonihacks.qalam.ui.theme.Amiri
 import com.tonihacks.qalam.ui.theme.HankenGrotesk
 import com.tonihacks.qalam.ui.theme.NewsReader
+import com.tonihacks.qalam.ui.theme.NotoNaskh
 import com.tonihacks.qalam.ui.theme.QalamGold
 import com.tonihacks.qalam.ui.theme.QalamInk
 import com.tonihacks.qalam.ui.theme.QalamInk2
@@ -181,7 +181,7 @@ private fun HomeHeader(
             )
             Text(
                 text = "قلم",
-                fontFamily = Amiri,
+                fontFamily = NotoNaskh,
                 fontSize = 40.sp,
                 lineHeight = 40.sp,
                 color = QalamInk,
@@ -268,7 +268,7 @@ private fun DueForReviewCard(dueCount: Int, onClick: () -> Unit) {
     ) {
         Text(
             text = "ت",
-            fontFamily = Amiri,
+            fontFamily = NotoNaskh,
             fontSize = 170.sp,
             color = Color.White.copy(alpha = 0.07f),
             modifier = Modifier
@@ -494,7 +494,7 @@ private fun RecentWordCard(word: Word, onClick: () -> Unit) {
         Box(Modifier.size(8.dp).background(word.masteryLevel.toQalamColor(), CircleShape))
         Text(
             text = word.arabicText,
-            fontFamily = Amiri,
+            fontFamily = NotoNaskh,
             fontSize = 30.sp,
             lineHeight = 34.sp,
             color = QalamInk,
