@@ -22,3 +22,4 @@ wireframe/*.js
 wireframe/.thumbnail
 wireframe/*.html
 !wireframe/Qalam Android Native Design.zip
+/app/qalam-release.keystore

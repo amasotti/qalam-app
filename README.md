@@ -64,9 +64,6 @@ The pulsing dot on the Home screen turns green when the backend is reachable.
 | UI | Jetpack Compose |
 | Navigation | Navigation Compose (type-safe `@Serializable` routes) |
 | HTTP | Ktor Client (Android engine) |
-| Serialization | kotlinx.serialization |
-| State | ViewModel + StateFlow |
-| Local cache | Room (offline fallback) |
 | Preferences | DataStore |
 | DI | Hilt |
 | Build | Gradle Kotlin DSL + Version Catalogs |
@@ -74,6 +71,4 @@ The pulsing dot on the Home screen turns green when the backend is reachable.
 ## Docs
 
 - [`docs/android-app.md`](docs/android-app.md) — full spec, API contract, architecture rules
-- [`docs/android-design.md`](docs/android-design.md) — color tokens, typography, spacing, animations
 - [`docs/android-plan.md`](docs/android-plan.md) — phased implementation guide (8 phases)
-- [`wireframe/Qalam.dc.html`](wireframe/Qalam.dc.html) — interactive prototype (visual source of truth)

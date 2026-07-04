@@ -65,38 +65,9 @@ Deliverable: can browse roots and their semantic families.
 
 ---
 
-## Phase 5 — Texts
+## ✅ Phase 5 — Texts
 
-### 5.1 Text list screen
-
-`ui/texts/TextListScreen.kt`:
-- Title "Texts" + passage count
-- Vertical list of text cards:
-  - Dialect chip (lapis) + difficulty chip
-  - Arabic title (Amiri 30sp, RTL)
-  - English title (Newsreader italic)
-  - "Read interlinear" link with `auto_stories` icon
-
-### 5.2 Text reader screen
-
-`ui/texts/TextReaderScreen.kt`:
-1. **Top bar**: back + italic English title
-2. **Arabic title** (32sp RTL) + dialect/difficulty/source chips
-3. **Toggle**: Interlinear | Plain (segmented control)
-4. **Interlinear view** (`FlowRow` with RTL direction):
-   - Each token: Arabic (30sp) + transliteration (lapis italic 12.5sp) + gloss (12sp)
-   - Linked tokens (have a `wordId`): lapis-c background
-   - Tap → bottom sheet
-5. **Plain view**: full Arabic text concatenated, 34sp, RTL
-6. **Translation card**: "Translation" label + Newsreader prose
-7. **Token bottom sheet**: large Arabic (52sp) + transliteration + gloss + "View full entry" button
-
-Fetch: `GET /api/v1/texts/{id}` + `GET /api/v1/texts/{id}/sentences` (for tokens).
-
-Note: `FlowRow` is in `Compose Foundation` — use `androidx.compose.foundation.layout.FlowRow`
-(stable since Compose 1.7).
-
-Deliverable: can read texts interlinearly, tap words, navigate to Word detail from text.
+Implemented the texts vertical end to end: text list pagination, dialect/difficulty chips, Arabic preview with Amiri RTL rendering, reader detail, interlinear/plain toggle, `FlowRow` token layout, token bottom sheet, and navigation from linked tokens to word detail. The reader uses `GET /api/v1/texts/{id}` plus `GET /api/v1/texts/{id}/sentences`; an empty sentence list is valid for newly-created backend texts, but failed sentence fetches should be surfaced as errors rather than silently displayed as empty interlinear content. The earlier source/comments chip idea was dropped because the backend source field does not exist and comments are not useful for the current learner workflow.
 
 ---
 
