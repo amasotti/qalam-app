@@ -63,41 +63,23 @@ shows accuracy/counts, and offers Done or Train again.
 
 ---
 
-## 🔄 Phase 7 — Home screen
+## ✅ Phase 7 — Home screen
 
-`ui/home/HomeScreen.kt` (final screen, depends on all others):
-
-**Top section**:
-- Greeting (Newsreader italic, time-of-day: Good morning/afternoon/evening)
-- "قلم" Arabic title (Amiri 40sp)
-- "Qalam · Arabic" subtitle (uppercase, letter-spacing 3dp)
-- Connection indicator: pulsing dot + "MacBook" / "Offline" label
-
-**Due-for-review hero card** (green gradient, tappable → start training):
-- "DUE FOR REVIEW" label (uppercase small)
-- Large count + "words waiting" (Newsreader italic)
-- "Start training session" pill button with bolt icon
-
-**Mastery overview card**:
-- Segmented bar (4 segments proportional to counts, 12dp height)
-- Legend: dot + label + count for each level
-
-**Quick stats grid** (3 columns):
-- Words count → Word list
-- Roots count → Root list
-- Texts count → Text list
-
-**"Jump back in" row** (horizontal scroll):
-- Up to 6 recent words as small cards (mastery dot + Arabic + transliteration + gloss)
-
-Fetch: `GET /api/v1/analytics/overview` for totals + mastery distribution.
-Fetch: `GET /api/v1/words?size=6&sort=updatedAt` for recent words.
+Implemented the full home dashboard: greeting header (time-of-day, Newsreader italic) with Amiri
+"قلم" wordmark, a tappable connection pill (merges the old settings-gear affordance — tapping the
+pill opens Settings), a gradient due-for-review hero that starts training, a proportional mastery
+segmented-bar card, a 3-column quick-stats grid (words/roots/texts, each navigating to its list),
+and a horizontal-scroll "Jump back in" row of the 6 most recently updated words. New
+`AnalyticsRepository` wraps `GET /api/v1/analytics/overview`; recent words reuse
+`WordRepository.getWords(sortBy=UPDATED_AT)`. The backend has no dedicated "due" queue, so
+`HomeOverview.dueCount` is derived as `totalWords - masteryCounts[MASTERED]` (everything still
+cycling through NEW/LEARNING/KNOWN). `HomeViewModel` fetches both endpoints in parallel via `async`.
 
 Deliverable: full app complete.
 
 ---
 
-## Phase 8 — Polish & install
+## 🔄 Phase 8 — Polish & install
 
 ### 8.1 Offline handling
 

@@ -22,10 +22,18 @@ data class TextSentence(
 
 data class TextToken(
     val id: String,
-    val sentenceId: String,
     val position: Int,
     val arabic: String,
     val transliteration: String?,
     val translation: String?,
     val wordId: String?,
+)
+
+data class TextAnnotation(
+    val id: String,
+    val textId: String,
+    val anchor: String,
+    val type: String,
+    val content: String?,
+    val linkedWordIds: List<String> = emptyList(),
 )

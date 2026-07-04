@@ -3,6 +3,7 @@ package com.tonihacks.qalam.ui.texts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tonihacks.qalam.data.local.PreferencesRepository
+import com.tonihacks.qalam.domain.model.TextAnnotation
 import com.tonihacks.qalam.domain.model.TextPassage
 import com.tonihacks.qalam.domain.model.TextSentence
 import com.tonihacks.qalam.domain.model.TextToken
@@ -24,10 +25,39 @@ sealed interface TextReaderUiState {
     data class Success(
         val text: TextPassage,
         val sentences: List<TextSentence>,
+        val annotations: List<TextAnnotation> = emptyList(),
         val isLinkingWord: Boolean = false,
         val linkWordError: String? = null,
     ) : TextReaderUiState
     data class Error(val message: String) : TextReaderUiState
+}
+
+private const val VOCABULARY_TYPE = "VOCABULARY"
+
+/**
+ * Alignment tokens don't carry a wordId once linking moves to annotations, so we derive the linked
+ * state here: a token counts as linked when a VOCABULARY annotation's anchor matches the token's
+ * surface form and carries at least one linked word. The first linked word id drives "View full entry".
+ */
+private fun enrichTokens(
+    sentences: List<TextSentence>,
+    annotations: List<TextAnnotation>,
+): List<TextSentence> {
+    val wordIdByAnchor = annotations
+        .filter { it.type == VOCABULARY_TYPE && it.linkedWordIds.isNotEmpty() }
+        .associate { it.anchor to it.linkedWordIds.first() }
+    if (wordIdByAnchor.isEmpty()) return sentences
+    return sentences.map { sentence ->
+        sentence.copy(
+            tokens = sentence.tokens.map { token ->
+                if (token.wordId == null) {
+                    wordIdByAnchor[token.arabic]?.let { token.copy(wordId = it) } ?: token
+                } else {
+                    token
+                }
+            },
+        )
+    }
 }
 
 @HiltViewModel
@@ -52,14 +82,17 @@ class TextReaderViewModel @Inject constructor(
 
             val textDeferred = async { textRepository.getText(baseUrl, textId) }
             val sentencesDeferred = async { textRepository.getSentences(baseUrl, textId) }
+            val annotationsDeferred = async { textRepository.getAnnotations(baseUrl, textId) }
 
             val textResult = textDeferred.await()
             val sentencesResult = sentencesDeferred.await()
+            val annotations = annotationsDeferred.await().getOrDefault(emptyList())
 
             _uiState.value = when {
                 textResult.isSuccess -> TextReaderUiState.Success(
                     text = textResult.getOrThrow(),
-                    sentences = sentencesResult.getOrDefault(emptyList()),
+                    sentences = enrichTokens(sentencesResult.getOrDefault(emptyList()), annotations),
+                    annotations = annotations,
                 )
                 else -> TextReaderUiState.Error(
                     textResult.exceptionOrNull()?.message ?: "Failed to load text"
@@ -69,12 +102,13 @@ class TextReaderViewModel @Inject constructor(
     }
 
     /**
-     * Turn an interlinear token into a vocabulary entry, then link the token to it.
+     * Turn an interlinear token into a vocabulary entry, then link it to the text via an annotation.
      *
      * The Arabic in [draft] may differ from [token].arabic — the user can edit the surface form to a
-     * lemma inside the sheet. So we look up by the drafted Arabic: reuse an existing word if one matches
-     * exactly, otherwise create a new one. Then we PUT the sentence's full token array with the target
-     * token's wordId set (the backend has no single-token patch).
+     * lemma inside the sheet. So we look up the *word* by the drafted Arabic (reuse on exact match,
+     * otherwise create). The *annotation* anchor keeps the original surface form ([token].arabic), which
+     * is what appears in the text, and links to the word id. Backend has no per-token wordId patch;
+     * linkage lives in annotations.
      */
     fun addTokenToVocabulary(token: TextToken, draft: WordDraft, onDone: () -> Unit) {
         val current = _uiState.value
@@ -92,24 +126,33 @@ class TextReaderViewModel @Inject constructor(
 
             wordResult.fold(
                 onSuccess = { word ->
-                    val sentence = current.sentences.firstOrNull { it.id == token.sentenceId }
-                    if (sentence == null) {
-                        setLinkError("Sentence for this word could not be found")
-                        return@fold
-                    }
-                    val updatedTokens = sentence.tokens.map {
-                        if (it.id == token.id) it.copy(wordId = word.id) else it
-                    }
-                    textRepository.replaceTokens(baseUrl, current.text.id, sentence.id, updatedTokens).fold(
-                        onSuccess = { updatedSentence ->
+                    val content = listOfNotNull(
+                        draft.transliteration?.ifBlank { null },
+                        draft.translation.ifBlank { null },
+                    ).joinToString(" - ").ifBlank { null }
+
+                    textRepository.createAnnotation(
+                        baseUrl = baseUrl,
+                        textId = current.text.id,
+                        anchor = token.arabic,
+                        type = VOCABULARY_TYPE,
+                        content = content,
+                        linkedWordIds = listOf(word.id),
+                    ).fold(
+                        onSuccess = { annotation ->
+                            // Re-fetch annotations so the reader reflects the backend's real link state
+                            // (already-linked words show "View full entry", not "Add to vocabulary").
+                            // Fall back to the just-created annotation if the refetch fails.
+                            val refreshed = textRepository.getAnnotations(baseUrl, current.text.id)
+                                .getOrDefault(current.annotations + annotation)
                             _uiState.update { state ->
-                                (state as? TextReaderUiState.Success)?.copy(
-                                    sentences = state.sentences.map { s ->
-                                        if (s.id == updatedSentence.id) updatedSentence else s
-                                    },
+                                val s = state as? TextReaderUiState.Success ?: return@update state
+                                s.copy(
+                                    annotations = refreshed,
+                                    sentences = enrichTokens(s.sentences, refreshed),
                                     isLinkingWord = false,
                                     linkWordError = null,
-                                ) ?: state
+                                )
                             }
                             onDone()
                         },

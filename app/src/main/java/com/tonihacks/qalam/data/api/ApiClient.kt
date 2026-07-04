@@ -1,13 +1,13 @@
 package com.tonihacks.qalam.data.api
 
 import com.tonihacks.qalam.data.api.dto.AnalyticsOverviewDto
+import com.tonihacks.qalam.data.api.dto.AnnotationDto
+import com.tonihacks.qalam.data.api.dto.CreateAnnotationRequestDto
 import com.tonihacks.qalam.data.api.dto.DictionaryLinkDto
 import com.tonihacks.qalam.data.api.dto.ExampleDto
 import com.tonihacks.qalam.data.api.dto.PagedResponseDto
-import com.tonihacks.qalam.data.api.dto.ReplaceTokensRequestDto
 import com.tonihacks.qalam.data.api.dto.RootDto
 import com.tonihacks.qalam.data.api.dto.SentenceDto
-import com.tonihacks.qalam.data.api.dto.TokenInputDto
 import com.tonihacks.qalam.data.api.dto.RecordTrainingResultRequestDto
 import com.tonihacks.qalam.data.api.dto.RecordTrainingResultResponseDto
 import com.tonihacks.qalam.data.api.dto.StartTrainingSessionRequestDto
@@ -22,7 +22,6 @@ import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
-import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -133,15 +132,19 @@ class ApiClient @Inject constructor(
         httpClient.get("$baseUrl/api/v1/texts/$textId/sentences").body()
     }
 
-    suspend fun replaceTokens(
+    // -------------- ANNOTATIONS -----------------
+    suspend fun getAnnotations(baseUrl: String, textId: String): Result<List<AnnotationDto>> = runCatching {
+        httpClient.get("$baseUrl/api/v1/texts/$textId/annotations").body()
+    }
+
+    suspend fun createAnnotation(
         baseUrl: String,
         textId: String,
-        sentenceId: String,
-        tokens: List<TokenInputDto>,
-    ): Result<SentenceDto> = runCatching {
-        httpClient.put("$baseUrl/api/v1/texts/$textId/sentences/$sentenceId/tokens") {
+        request: CreateAnnotationRequestDto,
+    ): Result<AnnotationDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/texts/$textId/annotations") {
             contentType(ContentType.Application.Json)
-            setBody(ReplaceTokensRequestDto(tokens))
+            setBody(request)
         }.body()
     }
 
