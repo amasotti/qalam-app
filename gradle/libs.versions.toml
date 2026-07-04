@@ -16,6 +16,8 @@ hilt           = "2.60"
 hiltNavCompose = "1.2.0"
 ktor           = "3.5.1"
 datastore      = "1.2.1"
+coroutinesTest = "1.11.0"
+mockk          = "1.14.11"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -54,6 +56,10 @@ ktor-client-android             = { group = "io.ktor", name = "ktor-client-andro
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-logging             = { group = "io.ktor", name = "ktor-client-logging",             version.ref = "ktor" }
+
+# Testing
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+mockk                   = { group = "io.mockk",              name = "mockk",                    version.ref = "mockk" }
 
 
 
