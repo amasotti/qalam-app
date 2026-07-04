@@ -8,6 +8,7 @@ import com.tonihacks.qalam.ui.home.HomeScreen
 import com.tonihacks.qalam.ui.roots.RootListScreen
 import com.tonihacks.qalam.ui.settings.SettingsScreen
 import com.tonihacks.qalam.ui.texts.TextListScreen
+import com.tonihacks.qalam.ui.texts.TextReaderScreen
 import com.tonihacks.qalam.ui.words.WordDetailScreen
 import com.tonihacks.qalam.ui.words.WordListScreen
 
@@ -34,7 +35,16 @@ fun MainNavDisplay(
                 )
             }
             entry<RootList> { RootListScreen() }
-            entry<TextList> { TextListScreen() }
+            entry<TextList> {
+                TextListScreen(onNavigateToText = { id -> backStack.add(TextDetail(id)) })
+            }
+            entry<TextDetail> { dest ->
+                TextReaderScreen(
+                    textId = dest.textId,
+                    onBack = { backStack.removeLastOrNull() },
+                    onNavigateToWord = { id -> backStack.add(WordDetail(id)) },
+                )
+            }
             entry<Settings> { SettingsScreen(onBack = { backStack.removeLastOrNull() }) }
         }
 

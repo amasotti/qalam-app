@@ -3,6 +3,8 @@ package com.tonihacks.qalam.data.api
 import com.tonihacks.qalam.data.api.dto.DictionaryLinkDto
 import com.tonihacks.qalam.data.api.dto.ExampleDto
 import com.tonihacks.qalam.data.api.dto.PagedResponseDto
+import com.tonihacks.qalam.data.api.dto.SentenceDto
+import com.tonihacks.qalam.data.api.dto.TextDto
 import com.tonihacks.qalam.data.api.dto.WordDraftDto
 import com.tonihacks.qalam.data.api.dto.WordDto
 import io.ktor.client.HttpClient
@@ -57,6 +59,25 @@ class ApiClient @Inject constructor(
             contentType(ContentType.Application.Json)
             setBody(draft)
         }.body()
+    }
+
+    suspend fun getTexts(
+        baseUrl: String,
+        page: Int = 0,
+        size: Int = 20,
+    ): Result<PagedResponseDto<TextDto>> = runCatching {
+        httpClient.get("$baseUrl/api/v1/texts") {
+            parameter("page", page)
+            parameter("size", size)
+        }.body()
+    }
+
+    suspend fun getText(baseUrl: String, id: String): Result<TextDto> = runCatching {
+        httpClient.get("$baseUrl/api/v1/texts/$id").body()
+    }
+
+    suspend fun getSentences(baseUrl: String, textId: String): Result<List<SentenceDto>> = runCatching {
+        httpClient.get("$baseUrl/api/v1/texts/$textId/sentences").body()
     }
 
 }
