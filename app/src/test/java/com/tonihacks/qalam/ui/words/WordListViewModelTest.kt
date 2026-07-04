@@ -130,6 +130,13 @@ class WordListViewModelTest {
         override suspend fun getWord(baseUrl: String, id: String): Result<Word> =
             error("not stubbed")
 
+        override suspend fun getWordByArabic(
+            baseUrl: String,
+            arabicText: String
+        ): Result<Word?> {
+            TODO("Not yet implemented")
+        }
+
         override suspend fun getExamples(baseUrl: String, wordId: String): Result<List<Example>> =
             error("not stubbed")
 
