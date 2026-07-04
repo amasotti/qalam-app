@@ -16,6 +16,7 @@ import com.tonihacks.qalam.navigation.Home
 import com.tonihacks.qalam.navigation.MainNavDisplay
 import com.tonihacks.qalam.navigation.RootList
 import com.tonihacks.qalam.navigation.TextList
+import com.tonihacks.qalam.navigation.Training
 import com.tonihacks.qalam.navigation.WordList
 import com.tonihacks.qalam.ui.components.QalamBottomNav
 import com.tonihacks.qalam.ui.theme.QalamBg
@@ -36,21 +37,23 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     containerColor = QalamBg,
                     bottomBar = {
-                        QalamBottomNav(
-                            currentDst = backStack.lastOrNull(),
-                            onNavigate = { dest ->
-                                // Tab switch: replace the top of the stack with the new root tab.
-                                // This prevents stacking Home→Words→Home→Words ad infinitum.
-                                val tabRoots = listOf(
-                                    Home, WordList,
-                                    RootList, TextList
-                                )
-                                if (dest != backStack.lastOrNull()) {
-                                    backStack.removeAll { it in tabRoots }
-                                    backStack.add(dest)
-                                }
-                            },
-                        )
+                        if (backStack.lastOrNull() != Training) {
+                            QalamBottomNav(
+                                currentDst = backStack.lastOrNull(),
+                                onNavigate = { dest ->
+                                    // Tab switch: replace the top of the stack with the new root tab.
+                                    // This prevents stacking Home→Words→Home→Words ad infinitum.
+                                    val tabRoots = listOf(
+                                        Home, WordList,
+                                        RootList, TextList
+                                    )
+                                    if (dest != backStack.lastOrNull()) {
+                                        backStack.removeAll { it in tabRoots }
+                                        backStack.add(dest)
+                                    }
+                                },
+                            )
+                        }
                     },
                 ) { innerPadding ->
                     MainNavDisplay(

@@ -8,7 +8,7 @@ import com.tonihacks.qalam.domain.model.RecordedTrainingResult
 interface TrainingRepository {
     suspend fun startSession(
         baseUrl: String,
-        mode: String = "ARABIC_TO_TRANSLATION",
+        mode: String = "MIXED",
         size: Int = 20,
     ): Result<TrainingSession>
 

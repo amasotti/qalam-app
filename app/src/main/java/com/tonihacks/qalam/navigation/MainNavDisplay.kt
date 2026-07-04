@@ -10,6 +10,7 @@ import com.tonihacks.qalam.ui.roots.RootListScreen
 import com.tonihacks.qalam.ui.settings.SettingsScreen
 import com.tonihacks.qalam.ui.texts.TextListScreen
 import com.tonihacks.qalam.ui.texts.TextReaderScreen
+import com.tonihacks.qalam.ui.training.TrainingRoute
 import com.tonihacks.qalam.ui.words.WordDetailScreen
 import com.tonihacks.qalam.ui.words.WordListScreen
 
@@ -23,7 +24,12 @@ fun MainNavDisplay(
         onBack = { backStack.removeLastOrNull() },
         modifier = modifier,
         entryProvider = entryProvider {
-            entry<Home>     { HomeScreen(onNavigateToSettings = { backStack.add(Settings) }) }
+            entry<Home> {
+                HomeScreen(
+                    onNavigateToSettings = { backStack.add(Settings) },
+                    onStartTraining = { backStack.add(Training) },
+                )
+            }
             entry<WordList> {
                 WordListScreen(onNavigateToWord = { id -> backStack.add(WordDetail(id)) })
             }
@@ -54,6 +60,9 @@ fun MainNavDisplay(
                     onBack = { backStack.removeLastOrNull() },
                     onNavigateToWord = { id -> backStack.add(WordDetail(id)) },
                 )
+            }
+            entry<Training> {
+                TrainingRoute(onClose = { backStack.removeLastOrNull() })
             }
             entry<Settings> { SettingsScreen(onBack = { backStack.removeLastOrNull() }) }
         }

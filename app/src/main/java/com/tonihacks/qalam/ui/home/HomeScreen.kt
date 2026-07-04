@@ -1,6 +1,5 @@
 package com.tonihacks.qalam.ui.home
 
-import android.net.Uri
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -9,13 +8,19 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -31,7 +36,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.tonihacks.qalam.ui.theme.QalamInk
 import com.tonihacks.qalam.ui.theme.QalamInk3
+import com.tonihacks.qalam.ui.theme.QalamOnPrimary
 import com.tonihacks.qalam.ui.theme.QalamPrimary
 import com.tonihacks.qalam.ui.theme.QalamTerra
 import com.tonihacks.qalam.ui.theme.Typography
@@ -41,6 +48,7 @@ import androidx.core.net.toUri
 @Composable
 fun HomeScreen(
     onNavigateToSettings: () -> Unit = {},
+    onStartTraining: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
@@ -54,7 +62,20 @@ fun HomeScreen(
     }
 
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Home")
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("Home", style = Typography.headlineMedium, color = QalamInk)
+            Spacer(Modifier.height(16.dp))
+            Button(
+                onClick = onStartTraining,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = QalamPrimary,
+                    contentColor = QalamOnPrimary,
+                ),
+            ) {
+                Icon(Icons.Filled.Bolt, contentDescription = null)
+                Text("Start training", style = Typography.labelLarge)
+            }
+        }
 
         Row(
             modifier = Modifier

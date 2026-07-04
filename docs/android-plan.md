@@ -57,13 +57,13 @@ Implemented the texts vertical end to end: text list pagination, dialect/difficu
 
 No explicit setup screen — matches the prototype.
 "Start training session" on Home and the FAB both call `POST /api/v1/training/sessions`
-with `{ mode: "ARABIC_TO_TRANSLATION", size: 20 }` (configurable later).
+with `{ mode: "MIXED", size: 20 }` (configurable later).
 
 The session response includes the word deck (`words: List<TrainingSessionWordResponse>`).
 Each word embeds up to 2 examples and synonym/antonym relations — no separate fetch needed.
 Store deck in `TrainingViewModel`.
 
-### 🔄 6.2 Flashcard screen
+### ✅ 6.2 Flashcard screen
 
 `ui/training/TrainingScreen.kt`:
 
@@ -91,7 +91,7 @@ Card rotation: `dragX * 0.04f` degrees
 
 After grading: `POST /api/v1/training/sessions/{id}/results` with word result.
 
-### 6.3 Summary screen
+### 🔄 6.3 Summary screen
 
 `ui/training/SummaryScreen.kt`:
 - Medal icon circle (primary-c background)
