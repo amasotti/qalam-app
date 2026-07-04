@@ -19,9 +19,14 @@ class WordRepositoryImpl @Inject constructor(
 ) : WordRepository {
 
     override suspend fun getWords(
-        baseUrl: String, query: String?, masteryLevel: String?, page: Int, size: Int,
+        baseUrl: String,
+        query: String?,
+        masteryLevel: String?,
+        rootId: String?,
+        page: Int,
+        size: Int,
     ): Result<PagedResult<Word>> =
-        apiClient.getWords(baseUrl, query, masteryLevel, page, size).map { dto ->
+        apiClient.getWords(baseUrl, query, masteryLevel, rootId, page, size).map { dto ->
             PagedResult(
                 items = dto.items.map { it.toDomain() },
                 total = dto.total,

@@ -39,29 +39,9 @@ Implemented the words vertical end to end: API DTOs and domain mapping, reposito
 
 ---
 
-## 🔄 Phase 4 — Roots
+## ✅ Phase 4 — Roots
 
-### 🔄 4.1 Root list screen
-
-`ui/roots/RootListScreen.kt`:
-- Title "Roots" + count + subtitle text ("The skeleton of the language…")
-- Vertical list of root cards:
-  - Arabic letters (Amiri 38sp, letter-spacing 6dp)
-  - Transliteration (Newsreader italic, gold color) + meaning
-  - Form count (22sp bold, right-aligned)
-
-### 4.2 Root detail screen
-
-`ui/roots/RootDetailScreen.kt`:
-1. **Back button**
-2. **Hero card** (gold gradient `#F2E2BD → #F8EED5`): large Arabic letters (62sp, letter-spacing 10dp), transliteration (gold italic), meaning
-3. **Semantic note card** (surface): `auto_awesome` icon + "Semantic note" label + prose text (Newsreader 16.5sp)
-4. **Derivation tree** (section label): vertical timeline with gold dots —
-   each row: Arabic (30sp) + transliteration + gloss. Linked forms (have a `wordId`) are tappable → Word detail. Unlinked: 62% opacity, no chevron.
-
-Fetch: `GET /api/v1/roots/{id}` (includes forms via the `words` relation).
-
-Deliverable: can browse roots and their semantic families.
+Implemented the roots vertical end to end: OpenAPI-backed root DTOs and domain mapping, repository methods, Hilt binding, paginated root list, form counts derived from `GET /api/v1/words?rootId=...`, root detail, semantic note rendering from `analysis`, and navigation from derivation rows to word detail. The original plan assumed `GET /api/v1/roots/{id}` embedded forms, but the backend only returns root metadata; Android now combines `GET /api/v1/roots/{id}` with a root-filtered word list to build the semantic family view.
 
 ---
 
@@ -71,7 +51,7 @@ Implemented the texts vertical end to end: text list pagination, dialect/difficu
 
 ---
 
-## Phase 6 — Training
+## 🔄 Phase 6 — Training
 
 ### 6.1 Training setup
 

@@ -3,6 +3,7 @@ package com.tonihacks.qalam.data.api
 import com.tonihacks.qalam.data.api.dto.DictionaryLinkDto
 import com.tonihacks.qalam.data.api.dto.ExampleDto
 import com.tonihacks.qalam.data.api.dto.PagedResponseDto
+import com.tonihacks.qalam.data.api.dto.RootDto
 import com.tonihacks.qalam.data.api.dto.SentenceDto
 import com.tonihacks.qalam.data.api.dto.TextDto
 import com.tonihacks.qalam.data.api.dto.WordDraftDto
@@ -31,6 +32,7 @@ class ApiClient @Inject constructor(
         baseUrl: String,
         query: String? = null,
         masteryLevel: String? = null,
+        rootId: String? = null,
         page: Int = 0,
         size: Int = 20,
     ): Result<PagedResponseDto<WordDto>> = runCatching {
@@ -39,7 +41,23 @@ class ApiClient @Inject constructor(
             parameter("size", size)
             if (!query.isNullOrEmpty()) parameter("q", query)
             if (!masteryLevel.isNullOrEmpty()) parameter("masteryLevel", masteryLevel)
+            if (!rootId.isNullOrEmpty()) parameter("rootId", rootId)
         }.body()
+    }
+
+    suspend fun getRoots(
+        baseUrl: String,
+        page: Int = 1,
+        size: Int = 20,
+    ): Result<PagedResponseDto<RootDto>> = runCatching {
+        httpClient.get("$baseUrl/api/v1/roots") {
+            parameter("page", page)
+            parameter("size", size)
+        }.body()
+    }
+
+    suspend fun getRoot(baseUrl: String, id: String): Result<RootDto> = runCatching {
+        httpClient.get("$baseUrl/api/v1/roots/$id").body()
     }
 
     suspend fun getWord(baseUrl: String, id: String): Result<WordDto> = runCatching {

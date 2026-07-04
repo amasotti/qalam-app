@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.tonihacks.qalam.ui.home.HomeScreen
+import com.tonihacks.qalam.ui.roots.RootDetailScreen
 import com.tonihacks.qalam.ui.roots.RootListScreen
 import com.tonihacks.qalam.ui.settings.SettingsScreen
 import com.tonihacks.qalam.ui.texts.TextListScreen
@@ -34,7 +35,16 @@ fun MainNavDisplay(
                     onNavigateToWord = { id -> backStack.add(WordDetail(id)) },
                 )
             }
-            entry<RootList> { RootListScreen() }
+            entry<RootList> {
+                RootListScreen(onNavigateToRoot = { id -> backStack.add(RootDetail(id)) })
+            }
+            entry<RootDetail> { dest ->
+                RootDetailScreen(
+                    rootId = dest.rootId,
+                    onBack = { backStack.removeLastOrNull() },
+                    onNavigateToWord = { id -> backStack.add(WordDetail(id)) },
+                )
+            }
             entry<TextList> {
                 TextListScreen(onNavigateToText = { id -> backStack.add(TextDetail(id)) })
             }

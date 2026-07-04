@@ -7,6 +7,7 @@ interface WordRepository {
         baseUrl: String,
         query: String? = null,
         masteryLevel: String? = null,
+        rootId: String? = null,
         page: Int = 0,
         size: Int = 20,
     ): Result<PagedResult<Word>>

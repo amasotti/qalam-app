@@ -181,6 +181,10 @@ If you want to install it without a computer:
 This usually happens if you try to install a **Release** build over a **Debug** build. Android security prevents this because the signing keys don't match.
 *   **Fix:** Uninstall the existing Qalam app from your phone first, then try the `adb install` again.
 
+### `SigningConfig "release" is missing required property "storePassword"`
+
+`project.findProperty()` reads `gradle.properties`, not `local.properties`. If signing props live in `local.properties`, you must load that file explicitly (see Step 2 above). The properties exist on disk but Gradle never sees them via `findProperty`.
+
 ### "Supplied proguard configuration does not exist"
 
 `app/proguard-rules.pro` is missing. See Step 2b — create the file, then rerun `assembleRelease`.
