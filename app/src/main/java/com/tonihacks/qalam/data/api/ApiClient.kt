@@ -5,7 +5,12 @@ import com.tonihacks.qalam.data.api.dto.ExampleDto
 import com.tonihacks.qalam.data.api.dto.PagedResponseDto
 import com.tonihacks.qalam.data.api.dto.RootDto
 import com.tonihacks.qalam.data.api.dto.SentenceDto
+import com.tonihacks.qalam.data.api.dto.RecordTrainingResultRequestDto
+import com.tonihacks.qalam.data.api.dto.RecordTrainingResultResponseDto
+import com.tonihacks.qalam.data.api.dto.StartTrainingSessionRequestDto
 import com.tonihacks.qalam.data.api.dto.TextDto
+import com.tonihacks.qalam.data.api.dto.TrainingSessionDto
+import com.tonihacks.qalam.data.api.dto.TrainingSessionSummaryDto
 import com.tonihacks.qalam.data.api.dto.WordDraftDto
 import com.tonihacks.qalam.data.api.dto.WordDto
 import io.ktor.client.HttpClient
@@ -23,11 +28,13 @@ import javax.inject.Singleton
 class ApiClient @Inject constructor(
     private val httpClient: HttpClient
 ) {
+    // -------------- HEALTH CHECK -----------------
     suspend fun testConnection(baseUrl: String): Result<Unit> =
         runCatching {
             httpClient.get("$baseUrl/health")
         }
 
+    // -------------- WORDS -----------------
     suspend fun getWords(
         baseUrl: String,
         query: String? = null,
@@ -43,21 +50,6 @@ class ApiClient @Inject constructor(
             if (!masteryLevel.isNullOrEmpty()) parameter("masteryLevel", masteryLevel)
             if (!rootId.isNullOrEmpty()) parameter("rootId", rootId)
         }.body()
-    }
-
-    suspend fun getRoots(
-        baseUrl: String,
-        page: Int = 1,
-        size: Int = 20,
-    ): Result<PagedResponseDto<RootDto>> = runCatching {
-        httpClient.get("$baseUrl/api/v1/roots") {
-            parameter("page", page)
-            parameter("size", size)
-        }.body()
-    }
-
-    suspend fun getRoot(baseUrl: String, id: String): Result<RootDto> = runCatching {
-        httpClient.get("$baseUrl/api/v1/roots/$id").body()
     }
 
     suspend fun getWord(baseUrl: String, id: String): Result<WordDto> = runCatching {
@@ -79,6 +71,24 @@ class ApiClient @Inject constructor(
         }.body()
     }
 
+    // -------------- ROOTS -----------------
+    suspend fun getRoots(
+        baseUrl: String,
+        page: Int = 1,
+        size: Int = 20,
+    ): Result<PagedResponseDto<RootDto>> = runCatching {
+        httpClient.get("$baseUrl/api/v1/roots") {
+            parameter("page", page)
+            parameter("size", size)
+        }.body()
+    }
+
+    suspend fun getRoot(baseUrl: String, id: String): Result<RootDto> = runCatching {
+        httpClient.get("$baseUrl/api/v1/roots/$id").body()
+    }
+
+
+    // -------------- TEXTS -----------------
     suspend fun getTexts(
         baseUrl: String,
         page: Int = 0,
@@ -98,4 +108,32 @@ class ApiClient @Inject constructor(
         httpClient.get("$baseUrl/api/v1/texts/$textId/sentences").body()
     }
 
+    // -------------- TRAINING -----------------
+    suspend fun startTrainingSession(
+        baseUrl: String,
+        request: StartTrainingSessionRequestDto,
+    ): Result<TrainingSessionDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/training/sessions") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun submitTrainingResult(
+        baseUrl: String,
+        sessionId: String,
+        request: RecordTrainingResultRequestDto,
+    ): Result<RecordTrainingResultResponseDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/training/sessions/$sessionId/results") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun completeTrainingSession(
+        baseUrl: String,
+        sessionId: String,
+    ): Result<TrainingSessionSummaryDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/training/sessions/$sessionId/complete").body()
+    }
 }

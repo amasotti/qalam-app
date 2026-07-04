@@ -53,7 +53,7 @@ Implemented the texts vertical end to end: text list pagination, dialect/difficu
 
 ## 🔄 Phase 6 — Training
 
-### 6.1 Training setup
+### ✅ 6.1 Training setup
 
 No explicit setup screen — matches the prototype.
 "Start training session" on Home and the FAB both call `POST /api/v1/training/sessions`
@@ -63,7 +63,7 @@ The session response includes the word deck (`words: List<TrainingSessionWordRes
 Each word embeds up to 2 examples and synonym/antonym relations — no separate fetch needed.
 Store deck in `TrainingViewModel`.
 
-### 6.2 Flashcard screen
+### 🔄 6.2 Flashcard screen
 
 `ui/training/TrainingScreen.kt`:
 

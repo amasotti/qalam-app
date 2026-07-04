@@ -6,6 +6,8 @@ import com.tonihacks.qalam.domain.repository.RootRepository
 import com.tonihacks.qalam.data.repository.RootRepositoryImpl
 import com.tonihacks.qalam.domain.repository.TextRepository
 import com.tonihacks.qalam.data.repository.TextRepositoryImpl
+import com.tonihacks.qalam.data.repository.TrainingRepositoryImpl
+import com.tonihacks.qalam.domain.repository.TrainingRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -26,4 +28,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindRootRepository(impl: RootRepositoryImpl): RootRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTrainingRepository(impl: TrainingRepositoryImpl): TrainingRepository
 }
