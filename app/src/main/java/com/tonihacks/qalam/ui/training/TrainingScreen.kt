@@ -53,13 +53,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonihacks.qalam.domain.model.Example
+import com.tonihacks.qalam.domain.model.FlashcardSide
 import com.tonihacks.qalam.domain.model.TrainingWord
 import com.tonihacks.qalam.domain.model.TrainingWordRelation
 import com.tonihacks.qalam.ui.theme.Amiri
@@ -75,7 +75,6 @@ import com.tonihacks.qalam.ui.theme.QalamSurface
 import com.tonihacks.qalam.ui.theme.QalamSurface2
 import com.tonihacks.qalam.ui.theme.QalamSurface3
 import com.tonihacks.qalam.ui.theme.QalamTerra
-import com.tonihacks.qalam.ui.theme.QalamTerraC
 import com.tonihacks.qalam.ui.theme.Typography
 import kotlin.math.roundToInt
 
@@ -282,7 +281,6 @@ private fun TrainingCard(
             TrainingCardContent(
                 word = word,
                 isRevealed = isRevealed,
-                onReveal = onReveal,
             )
         }
     }
@@ -308,7 +306,6 @@ private fun SwipeBadge(
 private fun TrainingCardContent(
     word: TrainingWord,
     isRevealed: Boolean,
-    onReveal: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -318,58 +315,113 @@ private fun TrainingCardContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        if (!isRevealed) {
+            TrainingPromptFace(word)
+            return@Column
+        }
+
+        RevealedAnswer(word)
+    }
+}
+
+@Composable
+private fun TrainingPromptFace(word: TrainingWord) {
+    when (word.frontSide) {
+        FlashcardSide.TRANSLATION -> {
             Text(
-                text = word.arabicText,
+                text = word.translation.takeUnless { it.isNullOrBlank() } ?: "Translation unavailable",
                 modifier = Modifier.fillMaxWidth(),
-                style = Typography.displaySmall.copy(
-                    fontFamily = Amiri,
-                    fontSize = 42.sp,
-                    lineHeight = 56.sp,
-                ),
+                style = Typography.headlineMedium,
                 color = QalamInk,
                 textAlign = TextAlign.Center,
             )
-        }
-
-        if (!isRevealed) {
             Spacer(Modifier.height(12.dp))
             Text(
-                "Tap show answer",
+                "Guess the Arabic",
                 style = Typography.bodySmall,
                 color = QalamInk3,
                 textAlign = TextAlign.Center,
             )
-            return@Column
         }
 
-        Spacer(Modifier.height(22.dp))
-        HorizontalDivider(color = QalamOutline)
-        Spacer(Modifier.height(22.dp))
-
-        word.transliteration?.takeIf { it.isNotBlank() }?.let {
-            Text(
-                text = it,
-                style = Typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
-                color = QalamInk2,
-                textAlign = TextAlign.Center,
+        FlashcardSide.ARABIC -> {
+            ArabicText(
+                text = word.arabicText,
+                modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(Modifier.height(8.dp))
-        }
-
-        word.translation?.takeIf { it.isNotBlank() }?.let {
-            Text(
-                text = it,
-                style = Typography.titleLarge,
-                color = QalamInk,
-                textAlign = TextAlign.Center,
-            )
+            word.transliteration?.takeIf { it.isNotBlank() }?.let {
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    text = it,
+                    style = Typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
+                    color = QalamInk2,
+                    textAlign = TextAlign.Center,
+                )
+            }
             Spacer(Modifier.height(12.dp))
+            Text(
+                "Guess the translation",
+                style = Typography.bodySmall,
+                color = QalamInk3,
+                textAlign = TextAlign.Center,
+            )
         }
+    }
+}
 
-        CardMetaRow(word)
-        ExampleList(word.examples)
-        RelationList(word.relations)
+@Composable
+private fun RevealedAnswer(word: TrainingWord) {
+    ArabicText(
+        text = word.arabicText,
+        modifier = Modifier.fillMaxWidth(),
+    )
+
+    Spacer(Modifier.height(22.dp))
+    HorizontalDivider(color = QalamOutline)
+    Spacer(Modifier.height(22.dp))
+
+    word.transliteration?.takeIf { it.isNotBlank() }?.let {
+        Text(
+            text = it,
+            style = Typography.bodyMedium.copy(fontStyle = FontStyle.Italic),
+            color = QalamInk2,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(8.dp))
+    }
+
+    word.translation?.takeIf { it.isNotBlank() }?.let {
+        Text(
+            text = it,
+            style = Typography.titleLarge,
+            color = QalamInk,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(12.dp))
+    }
+
+    CardMetaRow(word)
+    ExampleList(word.examples)
+    RelationList(word.relations)
+}
+
+@Composable
+private fun ArabicText(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        Text(
+            text = text,
+            modifier = modifier,
+            style = Typography.displaySmall.copy(
+                fontFamily = Amiri,
+                fontSize = 42.sp,
+                lineHeight = 56.sp,
+            ),
+            color = QalamInk,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 

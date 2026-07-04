@@ -9,6 +9,7 @@ import com.tonihacks.qalam.domain.model.RecordedTrainingResult
 import com.tonihacks.qalam.domain.model.MasteryLevel
 import com.tonihacks.qalam.domain.model.MasteryPromotion
 import com.tonihacks.qalam.domain.model.Example
+import com.tonihacks.qalam.domain.model.FlashcardSide
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -31,6 +32,7 @@ data class TrainingSessionWordDto(
     val arabicText: String,
     val transliteration: String? = null,
     val translation: String? = null,
+    val frontSide: String,
     val position: Int,
     val masteryLevel: String,
     val root: String? = null,
@@ -95,6 +97,7 @@ fun TrainingSessionDto.toDomain() = TrainingSession(
 
 fun TrainingSessionWordDto.toDomain() = TrainingWord(
     id = wordId,
+    frontSide = frontSide.toFlashcardSide(),
     arabicText = arabicText,
     transliteration = transliteration,
     translation = translation,
@@ -151,3 +154,6 @@ fun TrainingSessionSummaryDto.toDomain() = TrainingSessionSummary(
 
 private fun String.toMasteryLevel(): MasteryLevel =
     runCatching { MasteryLevel.valueOf(this) }.getOrDefault(MasteryLevel.NEW)
+
+private fun String.toFlashcardSide(): FlashcardSide =
+    runCatching { FlashcardSide.valueOf(this) }.getOrDefault(FlashcardSide.ARABIC)

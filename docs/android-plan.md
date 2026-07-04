@@ -74,7 +74,7 @@ Store deck in `TrainingViewModel`.
 - Hint: "Swipe right if you knew it · left to review again"
 
 **Card state machine:**
-- `notRevealed`: show Arabic only, "Tap to reveal" hint
+- `notRevealed`: if `frontSide == TRANSLATION`, show translation and guess Arabic; if `frontSide == ARABIC`, show Arabic + transliteration and guess translation
 - `revealed`: show Arabic + divider + transliteration + translation + POS + example
 
 **Swipe gesture** (use `detectDragGestures` from Compose):

@@ -9,6 +9,7 @@ data class TrainingSession(
 
 data class TrainingWord(
     val id: String,
+    val frontSide: FlashcardSide,
     val arabicText: String,
     val transliteration: String?,
     val translation: String?,
@@ -20,6 +21,8 @@ data class TrainingWord(
     val examples: List<Example>,
     val relations: List<TrainingWordRelation>,
 )
+
+enum class FlashcardSide { ARABIC, TRANSLATION }
 
 data class TrainingWordResult(
     val wordId: String,
