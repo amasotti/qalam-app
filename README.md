@@ -10,65 +10,80 @@
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 ![Store](https://img.shields.io/badge/Store-Sideload%20Only-orange)
 
-Native Android companion to [Qalam](https://github.com/amasotti/qalam) — a personal Arabic vocabulary and text study tool.
-Read-heavy, training-focused. Connects to the Ktor backend over Tailscale. No Play Store. Sideloaded only.
+Native Android companion to [Qalam](https://github.com/amasotti/qalam) — a personal Arabic
+vocabulary and text-study tool. Single user, read-and-train focused. Talks to the Ktor backend
+over Tailscale (no Play Store, sideloaded only).
 
 ## What it does
 
 | Screen | Purpose |
 |--------|---------|
-| Home | Mastery overview, due-for-review count, recent words |
-| Words | Dictionary with search, mastery filter, quick-add |
-| Roots | Trilateral root browser with derivation graph |
-| Texts | Interlinear reader with per-token gloss |
-| Training | SRS flashcard loop (swipe right = got it, left = again) |
+| Home | Greeting, connection pill, due-for-review hero, mastery overview, quick stats, recent words |
+| Words | Dictionary with search, mastery filter, pagination, quick-add via bottom sheet |
+| Word detail | Arabic hero, mastery bar, examples, AI examples, AI insight, dictionary + root links, sibling words |
+| Roots | Trilateral-root browser; root detail with semantic note and derivation family |
+| Texts | Interlinear reader with per-token gloss bottom sheet; interlinear/plain toggle |
+| Training | SRS flashcard loop (swipe right = got it, left = again) + session summary |
 | Settings | Backend URL + connection test |
 
-## Prerequisites
-
-- Android Studio Meerkat or later
-- JDK 17+
-- Android SDK (min API 31, target API 36)
-- [ADB](https://developer.android.com/tools/adb) on PATH
-- Phone with Developer Options → USB Debugging enabled
-- [Tailscale](https://tailscale.com) on both phone and laptop (backend reachable at `http://<laptop>.ts.net:8080`)
-
-## Build & install
-
-```bash
-# Build debug APK
-just build
-
-# Install on connected device (USB)
-just install
-
-# Build + install + launch in one step
-just run
-
-# Wireless ADB (pair first via Developer Options → Wireless Debugging)
-just pair IP=192.168.x.x PORT=xxxxx
-just connect IP=192.168.x.x PORT=xxxxx
-just install
-```
-
-## First launch
-
-Open Settings, set the backend URL to `http://<your-laptop-hostname>.ts.net:8080`, tap **Test connection**.
-The pulsing dot on the Home screen turns green when the backend is reachable.
+AI examples and AI insight (word/root explanations) are generated on demand by the backend; the app
+degrades gracefully when the AI service is unavailable.
 
 ## Tech stack
 
 | | |
 |---|---|
-| Language | Kotlin 2.x |
-| UI | Jetpack Compose |
-| Navigation | Navigation Compose (type-safe `@Serializable` routes) |
-| HTTP | Ktor Client (Android engine) |
+| Language | Kotlin 2.4.0 (JVM 17) |
+| UI | Jetpack Compose + Material 3 |
+| Navigation | Navigation3 (`androidx.navigation3`) — typed `Destination` sealed interface, `SnapshotStateList` back stack |
+| HTTP | Ktor Client 3.x (Android engine) + kotlinx.serialization |
+| Async / state | Coroutines + `StateFlow` per-screen sealed `UiState` |
 | Preferences | DataStore |
-| DI | Hilt |
-| Build | Gradle Kotlin DSL + Version Catalogs |
+| DI | Hilt (KSP) |
+| Build | Gradle Kotlin DSL + version catalog (`gradle/libs.versions.toml`) |
+| SDK | min 31, target/compile 37 |
+| Static analysis | detekt (`config/detekt/detekt.yml`) |
+
+## Prerequisites
+
+- Android Studio, JDK 17+, Android SDK (min API 31)
+- [ADB](https://developer.android.com/tools/adb) on `PATH`
+- Phone with Developer Options → USB (or Wireless) Debugging enabled
+- [Tailscale](https://tailscale.com) on both phone and backend host — the app reaches the backend at
+  its Tailscale address (raw IP or `<host>.ts.net`)
+
+## Build & install
+
+Uses [`just`](https://github.com/casey/just) as the task runner — run `just` for the full recipe list.
+
+```bash
+just build            # assembleDebug
+just install          # build + adb install on connected device
+just run              # build + install + launch
+
+# Wireless ADB (pair once via Developer Options → Wireless Debugging)
+just pair IP PORT     # pairing IP:port
+just connect IP PORT  # main wireless IP:port
+just install
+```
+
+## First launch
+
+Open **Settings**, set the backend URL to your backend's Tailscale address (default is a raw
+Tailscale IP; change it to your own), tap **Test connection** (`GET /health`). The connection pill on
+Home turns green (pulsing) when the backend is reachable, terra/steady when not.
+
+## Quality
+
+```bash
+just detekt   # static analysis — mandatory before finishing a change
+just test     # unit tests
+just lint     # Android lint
+just check    # lint + detekt + test
+```
 
 ## Docs
 
-- [`docs/android-app.md`](docs/android-app.md) — full spec, API contract, architecture rules
-- [`docs/android-plan.md`](docs/android-plan.md) — phased implementation guide (8 phases)
+- [`docs/architecture.md`](docs/architecture.md) — layer rules, API contract, key decisions
+- [`docs/design-system.md`](docs/design-system.md) — color/typography tokens, components, animations
+- [`docs/runbooks/release-sideloading.md`](docs/runbooks/release-sideloading.md) — signed release build & sideload
