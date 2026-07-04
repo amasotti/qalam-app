@@ -89,10 +89,6 @@ fun TrainingRoute(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        if (state.session == null) viewModel.startSession()
-    }
-
     LaunchedEffect(state.isComplete) {
         if (state.isComplete && state.summary == null) {
             viewModel.completeSession()
@@ -102,6 +98,8 @@ fun TrainingRoute(
     TrainingScreen(
         state = state,
         onClose = onClose,
+        onStartTraining = viewModel::startSession,
+        onTrainAgain = viewModel::resetSession,
         onReveal = viewModel::revealAnswer,
         onGrade = viewModel::submitCurrentResult,
     )
@@ -111,6 +109,8 @@ fun TrainingRoute(
 fun TrainingScreen(
     state: TrainingUiState,
     onClose: () -> Unit,
+    onStartTraining: (String, Int) -> Unit,
+    onTrainAgain: () -> Unit,
     onReveal: () -> Unit,
     onGrade: (Boolean) -> Unit,
 ) {
@@ -123,10 +123,147 @@ fun TrainingScreen(
         when {
             state.isLoading -> TrainingLoading()
             state.error != null && state.session == null -> TrainingError(state.error, onClose)
-            state.session == null -> TrainingLoading()
+            state.session == null -> TrainingSetupScreen(
+                onClose = onClose,
+                onStartTraining = onStartTraining,
+            )
             state.session.words.isEmpty() -> TrainingEmpty(onClose)
-            state.isComplete -> TrainingComplete(state, onClose)
+            state.isComplete -> TrainingComplete(state, onClose, onTrainAgain)
             else -> TrainingDeck(state, onClose, onReveal, onGrade)
+        }
+    }
+}
+
+private enum class TrainingModeOption(
+    val value: String,
+    val title: String,
+    val description: String,
+) {
+    Mixed("MIXED", "Mixed", "Any due word"),
+    New("NEW", "New", "Unseen words"),
+    Learning("LEARNING", "Learning", "Still forming"),
+    Known("KNOWN", "Known", "Keep sharp"),
+}
+
+private val TrainingSizeOptions = listOf(5, 10, 20, 30, 50)
+
+@Composable
+private fun TrainingSetupScreen(
+    onClose: () -> Unit,
+    onStartTraining: (String, Int) -> Unit,
+) {
+    var selectedMode by remember { mutableStateOf(TrainingModeOption.Mixed) }
+    var selectedSize by remember { mutableStateOf(20) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("Training", style = Typography.headlineMedium, color = QalamInk)
+            IconButton(onClick = onClose) {
+                Icon(Icons.Outlined.Close, contentDescription = "Close training", tint = QalamInk)
+            }
+        }
+
+        Spacer(Modifier.height(28.dp))
+        Text("Mode", style = Typography.labelLarge, color = QalamInk2)
+        Spacer(Modifier.height(10.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            TrainingModeOption.entries.forEach { mode ->
+                SetupOptionButton(
+                    title = mode.title,
+                    description = mode.description,
+                    selected = selectedMode == mode,
+                    onClick = { selectedMode = mode },
+                )
+            }
+        }
+
+        Spacer(Modifier.height(28.dp))
+        Text("Session size", style = Typography.labelLarge, color = QalamInk2)
+        Spacer(Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            TrainingSizeOptions.forEach { size ->
+                SizeButton(
+                    size = size,
+                    selected = selectedSize == size,
+                    onClick = { selectedSize = size },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+
+        Spacer(Modifier.height(32.dp))
+        Button(
+            onClick = { onStartTraining(selectedMode.value, selectedSize) },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = QalamPrimary,
+                contentColor = QalamOnPrimary,
+            ),
+            contentPadding = PaddingValues(vertical = 14.dp),
+        ) {
+            Text("Start ${selectedSize}-card session", style = Typography.labelLarge)
+        }
+    }
+}
+
+@Composable
+private fun SetupOptionButton(
+    title: String,
+    description: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    val container = if (selected) QalamPrimaryC else QalamSurface
+    val titleColor = if (selected) QalamPrimary else QalamInk
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = container),
+        shape = RoundedCornerShape(8.dp),
+    ) {
+        Column(Modifier.padding(14.dp)) {
+            Text(title, style = Typography.titleMedium, color = titleColor)
+            Spacer(Modifier.height(2.dp))
+            Text(description, style = Typography.bodySmall, color = QalamInk2)
+        }
+    }
+}
+
+@Composable
+private fun SizeButton(
+    size: Int,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (selected) {
+        Button(
+            onClick = onClick,
+            modifier = modifier,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = QalamPrimary,
+                contentColor = QalamOnPrimary,
+            ),
+        ) {
+            Text(size.toString(), style = Typography.labelLarge)
+        }
+    } else {
+        OutlinedButton(
+            onClick = onClick,
+            modifier = modifier,
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = QalamInk),
+        ) {
+            Text(size.toString(), style = Typography.labelLarge)
         }
     }
 }
@@ -641,6 +778,7 @@ private fun TrainingEmpty(onClose: () -> Unit) {
 private fun TrainingComplete(
     state: TrainingUiState,
     onClose: () -> Unit,
+    onTrainAgain: () -> Unit,
 ) {
     val summary = state.summary
     val message = if (summary == null) {
@@ -654,6 +792,8 @@ private fun TrainingComplete(
         message = message,
         actionLabel = "Done",
         onAction = onClose,
+        secondaryActionLabel = "Train again",
+        onSecondaryAction = onTrainAgain,
         showProgress = summary == null,
     )
 }
@@ -664,6 +804,8 @@ private fun TrainingMessage(
     message: String,
     actionLabel: String,
     onAction: () -> Unit,
+    secondaryActionLabel: String? = null,
+    onSecondaryAction: (() -> Unit)? = null,
     showProgress: Boolean = false,
 ) {
     Column(
@@ -699,6 +841,16 @@ private fun TrainingMessage(
             ),
         ) {
             Text(actionLabel, style = Typography.labelLarge)
+        }
+        if (secondaryActionLabel != null && onSecondaryAction != null) {
+            Spacer(Modifier.height(10.dp))
+            OutlinedButton(
+                onClick = onSecondaryAction,
+                enabled = !showProgress,
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = QalamPrimary),
+            ) {
+                Text(secondaryActionLabel, style = Typography.labelLarge)
+            }
         }
     }
 }

@@ -51,62 +51,19 @@ Implemented the texts vertical end to end: text list pagination, dialect/difficu
 
 ---
 
-## 🔄 Phase 6 — Training
+## ✅ Phase 6 — Training
 
-### ✅ 6.1 Training setup
-
-No explicit setup screen — matches the prototype.
-"Start training session" on Home and the FAB both call `POST /api/v1/training/sessions`
-with `{ mode: "MIXED", size: 20 }` (configurable later).
-
-The session response includes the word deck (`words: List<TrainingSessionWordResponse>`).
-Each word embeds up to 2 examples and synonym/antonym relations — no separate fetch needed.
-Store deck in `TrainingViewModel`.
-
-### ✅ 6.2 Flashcard screen
-
-`ui/training/TrainingScreen.kt`:
-
-**Layout** (no bottom nav, no FAB):
-- Top: close (✕) + progress bar + "N / M" counter
-- Center: card stack (next card peeking behind, scaled 0.93 + offset 20dp)
-- Bottom: "Show answer" button (pre-reveal) or "Again" + "Got it" row (post-reveal)
-- Hint: "Swipe right if you knew it · left to review again"
-
-**Card state machine:**
-- `notRevealed`: if `frontSide == TRANSLATION`, show translation and guess Arabic; if `frontSide == ARABIC`, show Arabic + transliteration and guess translation
-- `revealed`: show Arabic + divider + transliteration + translation + POS + example
-
-**Swipe gesture** (use `detectDragGestures` from Compose):
-```
-onDrag: update dragX offset
-onDragEnd:
-  if revealed && dragX > 150dp → animate card out quickly, then grade correct (swipe right)
-  if revealed && dragX < -150dp → animate card out quickly, then grade incorrect (swipe left)
-  else → spring back to 0
-```
-"KNEW IT ✓" badge: left side, opacity = `(dragX / 150).coerceIn(0f, 1f)`
-"AGAIN ↻" badge: right side, opacity = `(-dragX / 150).coerceIn(0f, 1f)`
-Card rotation: `dragX * 0.025f` degrees
-
-After grading: `POST /api/v1/training/sessions/{id}/results` with word result.
-
-### 🔄 6.3 Summary screen
-
-`ui/training/SummaryScreen.kt`:
-- Medal icon circle (primary-c background)
-- "Session complete" (Newsreader 30sp) + accuracy %
-- Two stat cards: "Knew it" (primary-c) + "To review" (terra-c) with counts
-- Scrollable word result list (check_circle green / replay_circle_filled terra)
-- "Done" → Home, "Train again" → new session
-
-Call `POST /api/v1/training/sessions/{id}/complete` when summary is reached.
-
-Deliverable: full training loop, session recorded in backend DB.
+Implemented the full training loop against the existing backend training API. Home opens a compact
+training setup screen where mode (`MIXED`, `NEW`, `LEARNING`, `KNOWN`) and size (`10`, `20`, `30`,
+`50`) are selected before `POST /api/v1/training/sessions`. The flashcard screen uses the session
+deck returned by the backend, including `frontSide`, examples, and relations; tapping reveals, swiping
+after reveal records results, and the card follows the finger with a quick committed exit animation.
+The inline completion panel intentionally stays minimal: it completes the session in the backend,
+shows accuracy/counts, and offers Done or Train again.
 
 ---
 
-## Phase 7 — Home screen
+## 🔄 Phase 7 — Home screen
 
 `ui/home/HomeScreen.kt` (final screen, depends on all others):
 

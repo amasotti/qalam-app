@@ -41,11 +41,14 @@ class TrainingViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(TrainingUiState())
     val uiState: StateFlow<TrainingUiState> = _uiState.asStateFlow()
 
-    fun startSession() {
+    fun startSession(
+        mode: String = "MIXED",
+        size: Int = 20,
+    ) {
         viewModelScope.launch {
             _uiState.update { TrainingUiState(isLoading = true) }
             val baseUrl = prefs.baseUrl.first()
-            trainingRepository.startSession(baseUrl).fold(
+            trainingRepository.startSession(baseUrl, mode, size).fold(
                 onSuccess = { session ->
                     _uiState.update { TrainingUiState(session = session) }
                 },
@@ -56,6 +59,10 @@ class TrainingViewModel @Inject constructor(
                 },
             )
         }
+    }
+
+    fun resetSession() {
+        _uiState.value = TrainingUiState()
     }
 
     fun revealAnswer() {
