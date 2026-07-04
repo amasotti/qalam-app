@@ -1,5 +1,6 @@
 package com.tonihacks.qalam.data.api
 
+import com.tonihacks.qalam.data.api.dto.AnalyticsOverviewDto
 import com.tonihacks.qalam.data.api.dto.DictionaryLinkDto
 import com.tonihacks.qalam.data.api.dto.ExampleDto
 import com.tonihacks.qalam.data.api.dto.PagedResponseDto
@@ -143,5 +144,10 @@ class ApiClient @Inject constructor(
         sessionId: String,
     ): Result<TrainingSessionSummaryDto> = runCatching {
         httpClient.post("$baseUrl/api/v1/training/sessions/$sessionId/complete").body()
+    }
+
+    // -------------- ANALYTICS -----------------
+    suspend fun getAnalyticsOverview(baseUrl: String): Result<AnalyticsOverviewDto> = runCatching {
+        httpClient.get("$baseUrl/api/v1/analytics/overview").body()
     }
 }

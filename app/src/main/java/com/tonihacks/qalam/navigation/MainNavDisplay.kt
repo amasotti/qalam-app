@@ -28,6 +28,10 @@ fun MainNavDisplay(
                 HomeScreen(
                     onNavigateToSettings = { backStack.add(Settings) },
                     onStartTraining = { backStack.add(Training) },
+                    onNavigateToWords = { backStack.add(WordList) },
+                    onNavigateToRoots = { backStack.add(RootList) },
+                    onNavigateToTexts = { backStack.add(TextList) },
+                    onNavigateToWord = { id -> backStack.add(WordDetail(id)) },
                 )
             }
             entry<WordList> {
