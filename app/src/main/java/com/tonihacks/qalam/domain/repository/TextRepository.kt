@@ -9,6 +9,8 @@ interface TextRepository {
         baseUrl: String,
         page: Int = 0,
         size: Int = 20,
+        sortBy: String = "UPDATED_AT",
+        sortDesc: Boolean = true,
     ): Result<PagedResult<TextPassage>>
 
     suspend fun getText(baseUrl: String, id: String): Result<TextPassage>

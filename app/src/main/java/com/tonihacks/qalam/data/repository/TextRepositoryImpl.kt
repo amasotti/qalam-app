@@ -15,9 +15,9 @@ class TextRepositoryImpl @Inject constructor(
 ) : TextRepository {
 
     override suspend fun getTexts(
-        baseUrl: String, page: Int, size: Int,
+        baseUrl: String, page: Int, size: Int, sortBy: String, sortDesc: Boolean,
     ): Result<PagedResult<TextPassage>> =
-        apiClient.getTexts(baseUrl, page, size).map { dto ->
+        apiClient.getTexts(baseUrl, page, size, sortBy, sortDesc).map { dto ->
             PagedResult(
                 items = dto.items.map { it.toDomain() },
                 total = dto.total,

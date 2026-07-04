@@ -97,10 +97,14 @@ class ApiClient @Inject constructor(
         baseUrl: String,
         page: Int = 0,
         size: Int = 20,
+        sortBy: String = "UPDATED_AT",
+        sortDesc: Boolean = true,
     ): Result<PagedResponseDto<TextDto>> = runCatching {
         httpClient.get("$baseUrl/api/v1/texts") {
             parameter("page", page)
             parameter("size", size)
+            parameter("sortBy", sortBy)
+            parameter("sortDesc", sortDesc)
         }.body()
     }
 
