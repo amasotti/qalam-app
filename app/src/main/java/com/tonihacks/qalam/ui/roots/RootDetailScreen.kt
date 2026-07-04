@@ -48,6 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonihacks.qalam.domain.model.Root
 import com.tonihacks.qalam.domain.model.Word
+import com.tonihacks.qalam.ui.components.MarkdownText
 import com.tonihacks.qalam.ui.theme.Amiri
 import com.tonihacks.qalam.ui.theme.NewsReader
 import com.tonihacks.qalam.ui.theme.QalamGold
@@ -206,13 +207,10 @@ private fun SemanticNoteCard(analysis: String) {
             Column {
                 Text("Semantic note", style = Typography.labelMedium, color = QalamGold)
                 Spacer(Modifier.height(6.dp))
-                SelectionContainer {
-                    Text(
-                        analysis,
-                        style = TextStyle(fontFamily = NewsReader, fontSize = 16.5.sp, lineHeight = 25.sp),
-                        color = QalamInk,
-                    )
-                }
+                MarkdownText(
+                    markdown = analysis,
+                    paragraphStyle = TextStyle(fontFamily = NewsReader, fontSize = 16.5.sp, lineHeight = 25.sp),
+                )
             }
         }
     }
