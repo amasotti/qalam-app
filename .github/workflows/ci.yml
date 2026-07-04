@@ -26,6 +26,9 @@ jobs:
       - name: Lint
         run: ./gradlew lint
 
+      - name: Detekt
+        run: ./gradlew detekt
+
       - name: Unit tests
         run: ./gradlew test
 
