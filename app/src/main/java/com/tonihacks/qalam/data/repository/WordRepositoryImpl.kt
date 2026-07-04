@@ -1,15 +1,21 @@
 package com.tonihacks.qalam.data.repository
 
 import com.tonihacks.qalam.data.api.ApiClient
+import com.tonihacks.qalam.data.api.dto.CreateWordExampleRequestDto
 import com.tonihacks.qalam.data.api.dto.DictionaryLinkDto
+import com.tonihacks.qalam.data.api.dto.InsightRequestDto
 import com.tonihacks.qalam.data.api.dto.toDomain
 import com.tonihacks.qalam.data.api.dto.toDto
+import com.tonihacks.qalam.domain.model.AiExample
+import com.tonihacks.qalam.domain.model.AiUnavailableException
 import com.tonihacks.qalam.domain.model.DictionaryLink
 import com.tonihacks.qalam.domain.model.Example
 import com.tonihacks.qalam.domain.model.PagedResult
 import com.tonihacks.qalam.domain.model.Word
 import com.tonihacks.qalam.domain.model.WordDraft
 import com.tonihacks.qalam.domain.repository.WordRepository
+import io.ktor.client.plugins.ServerResponseException
+import io.ktor.http.HttpStatusCode
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,4 +58,33 @@ class WordRepositoryImpl @Inject constructor(
 
     override suspend fun createWord(baseUrl: String, draft: WordDraft): Result<Word> =
         apiClient.createWord(baseUrl, draft.toDto()).map { it.toDomain() }
+
+    override suspend fun saveExample(baseUrl: String, wordId: String, example: AiExample): Result<Example> =
+        apiClient.saveExample(
+            baseUrl,
+            wordId,
+            CreateWordExampleRequestDto(
+                arabic = example.arabic,
+                transliteration = example.transliteration,
+                translation = example.translation,
+            ),
+        ).map { it.toDomain() }
+
+    override suspend fun generateExamples(baseUrl: String, wordId: String): Result<List<AiExample>> =
+        apiClient.generateExamples(baseUrl, wordId)
+            .map { dto -> dto.examples.map { it.toDomain() } }
+            .mapAiUnavailable()
+
+    override suspend fun generateInsight(baseUrl: String, entityType: String, entityId: String): Result<String> =
+        apiClient.generateInsight(baseUrl, InsightRequestDto(entityType = entityType, entityId = entityId))
+            .map { it.insight }
+            .mapAiUnavailable()
+
+    /** Translate a backend 503 into [AiUnavailableException] so the UI can show the "not configured" state. */
+    private fun <T> Result<T>.mapAiUnavailable(): Result<T> = recoverCatching { err ->
+        if (err is ServerResponseException && err.response.status == HttpStatusCode.ServiceUnavailable) {
+            throw AiUnavailableException()
+        }
+        throw err
+    }
 }

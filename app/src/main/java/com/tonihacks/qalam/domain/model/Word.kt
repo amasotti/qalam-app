@@ -29,6 +29,13 @@ data class Example(
     val translation: String?,
 )
 
+/** AI-generated example sentence — ephemeral until the user saves it as an [Example]. */
+data class AiExample(
+    val arabic: String,
+    val transliteration: String?,
+    val translation: String?,
+)
+
 data class WordDraft(
     val arabicText: String,
     val translation: String,

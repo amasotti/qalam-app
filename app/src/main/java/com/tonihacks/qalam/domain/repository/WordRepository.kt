@@ -19,4 +19,8 @@ interface WordRepository {
     suspend fun getExamples(baseUrl: String, wordId: String): Result<List<Example>>
     suspend fun getDictionaryLinks(baseUrl: String, wordId: String): Result<List<DictionaryLink>>
     suspend fun createWord(baseUrl: String, draft: WordDraft): Result<Word>
+
+    suspend fun saveExample(baseUrl: String, wordId: String, example: AiExample): Result<Example>
+    suspend fun generateExamples(baseUrl: String, wordId: String): Result<List<AiExample>>
+    suspend fun generateInsight(baseUrl: String, entityType: String, entityId: String): Result<String>
 }

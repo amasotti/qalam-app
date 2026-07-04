@@ -1,10 +1,14 @@
 package com.tonihacks.qalam.data.api
 
+import com.tonihacks.qalam.data.api.dto.AiExamplesResponseDto
 import com.tonihacks.qalam.data.api.dto.AnalyticsOverviewDto
 import com.tonihacks.qalam.data.api.dto.AnnotationDto
 import com.tonihacks.qalam.data.api.dto.CreateAnnotationRequestDto
+import com.tonihacks.qalam.data.api.dto.CreateWordExampleRequestDto
 import com.tonihacks.qalam.data.api.dto.DictionaryLinkDto
 import com.tonihacks.qalam.data.api.dto.ExampleDto
+import com.tonihacks.qalam.data.api.dto.InsightRequestDto
+import com.tonihacks.qalam.data.api.dto.InsightResponseDto
 import com.tonihacks.qalam.data.api.dto.PagedResponseDto
 import com.tonihacks.qalam.data.api.dto.RootDto
 import com.tonihacks.qalam.data.api.dto.SentenceDto
@@ -67,6 +71,21 @@ class ApiClient @Inject constructor(
 
     suspend fun getExamples(baseUrl: String, wordId: String): Result<List<ExampleDto>> = runCatching {
         httpClient.get("$baseUrl/api/v1/words/$wordId/examples").body()
+    }
+
+    suspend fun saveExample(
+        baseUrl: String,
+        wordId: String,
+        request: CreateWordExampleRequestDto,
+    ): Result<ExampleDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/words/$wordId/examples") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun generateExamples(baseUrl: String, wordId: String): Result<AiExamplesResponseDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/words/$wordId/examples/generate").body()
     }
 
     suspend fun getDictionaryLinks(baseUrl: String, wordId: String): Result<List<DictionaryLinkDto>> = runCatching {
@@ -180,5 +199,13 @@ class ApiClient @Inject constructor(
     // -------------- ANALYTICS -----------------
     suspend fun getAnalyticsOverview(baseUrl: String): Result<AnalyticsOverviewDto> = runCatching {
         httpClient.get("$baseUrl/api/v1/analytics/overview").body()
+    }
+
+    // -------------- AI -----------------
+    suspend fun generateInsight(baseUrl: String, request: InsightRequestDto): Result<InsightResponseDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/ai/insight") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
     }
 }

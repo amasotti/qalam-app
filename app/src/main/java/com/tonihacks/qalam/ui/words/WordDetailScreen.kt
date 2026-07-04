@@ -39,9 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tonihacks.qalam.domain.model.AiExample
 import com.tonihacks.qalam.domain.model.DictionaryLink
-import com.tonihacks.qalam.domain.model.Example
-import com.tonihacks.qalam.domain.model.Word
 import com.tonihacks.qalam.ui.theme.QalamGold
 import com.tonihacks.qalam.ui.theme.QalamGoldC
 import com.tonihacks.qalam.ui.theme.QalamInk
@@ -73,12 +72,16 @@ fun WordDetailScreen(
         }
 
         is WordDetailUiState.Success -> WordDetailContent(
-            word = s.word,
-            examples = s.examples,
-            dictionaries = s.dictionaries,
+            state = s,
             onBack = onBack,
             onNavigateToRoot = onNavigateToRoot,
             onNavigateToWord = onNavigateToWord,
+            onGenerateExamples = viewModel::generateExamples,
+            onUseExample = viewModel::useExample,
+            onDiscardExample = viewModel::discardExample,
+            onDismissExamples = viewModel::dismissExamples,
+            onGetInsight = viewModel::getInsight,
+            onDismissInsight = viewModel::dismissInsight,
         )
     }
 }
@@ -86,13 +89,21 @@ fun WordDetailScreen(
 
 @Composable
 fun WordDetailContent(
-    word: Word,
-    examples: List<Example>,
-    dictionaries: List<DictionaryLink>,
+    state: WordDetailUiState.Success,
     onBack: () -> Unit,
     onNavigateToRoot: (String) -> Unit,
     onNavigateToWord: (String) -> Unit,
+    onGenerateExamples: () -> Unit,
+    onUseExample: (AiExample) -> Unit,
+    onDiscardExample: (AiExample) -> Unit,
+    onDismissExamples: () -> Unit,
+    onGetInsight: () -> Unit,
+    onDismissInsight: () -> Unit,
 ) {
+    val word = state.word
+    val examples = state.examples
+    val dictionaries = state.dictionaries
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 80.dp),
@@ -169,6 +180,27 @@ fun WordDetailContent(
             items(examples) { ex -> ExampleCard(ex) }
         }
 
+        // 5b. AI example generation
+        item {
+            Text(
+                "AI EXAMPLES",
+                style = Typography.labelSmall.copy(letterSpacing = 2.sp),
+                modifier = Modifier.padding(start = 22.dp, top = 16.dp, bottom = 4.dp),
+                color = QalamInk2,
+            )
+            AiExamplesSection(
+                aiExamples = state.aiExamples,
+                isGenerating = state.isGeneratingExamples,
+                isSaving = state.savingExample,
+                error = state.examplesError,
+                unavailable = state.aiExamplesUnavailable,
+                onGenerate = onGenerateExamples,
+                onUse = onUseExample,
+                onDiscard = onDiscardExample,
+                onDismiss = onDismissExamples,
+            )
+        }
+
         // 6. Root link card
         word.rootId?.let { rid ->
             item {
@@ -226,6 +258,26 @@ fun WordDetailContent(
             }
             items(allLinks, key = { it.id }) { link ->
                 DictionaryRow(name = link.source, url = link.url)
+            }
+        }
+
+        // 9. AI insight (hidden entirely when the backend AI is unavailable)
+        if (!state.insightUnavailable) {
+            item {
+                Text(
+                    "AI INSIGHT",
+                    style = Typography.labelSmall.copy(letterSpacing = 2.sp),
+                    modifier = Modifier.padding(start = 22.dp, top = 16.dp, bottom = 4.dp),
+                    color = QalamInk2,
+                )
+                AiInsightSection(
+                    phase = state.insightPhase,
+                    insightText = state.insightText,
+                    error = state.insightError,
+                    unavailable = state.insightUnavailable,
+                    onGet = onGetInsight,
+                    onDismiss = onDismissInsight,
+                )
             }
         }
 
