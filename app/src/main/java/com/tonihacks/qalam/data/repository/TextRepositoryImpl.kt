@@ -2,9 +2,11 @@ package com.tonihacks.qalam.data.repository
 
 import com.tonihacks.qalam.data.api.ApiClient
 import com.tonihacks.qalam.data.api.dto.toDomain
+import com.tonihacks.qalam.data.api.dto.toInputDto
 import com.tonihacks.qalam.domain.model.PagedResult
 import com.tonihacks.qalam.domain.model.TextPassage
 import com.tonihacks.qalam.domain.model.TextSentence
+import com.tonihacks.qalam.domain.model.TextToken
 import com.tonihacks.qalam.domain.repository.TextRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,4 +32,13 @@ class TextRepositoryImpl @Inject constructor(
 
     override suspend fun getSentences(baseUrl: String, textId: String): Result<List<TextSentence>> =
         apiClient.getSentences(baseUrl, textId).map { list -> list.map { it.toDomain() } }
+
+    override suspend fun replaceTokens(
+        baseUrl: String,
+        textId: String,
+        sentenceId: String,
+        tokens: List<TextToken>,
+    ): Result<TextSentence> =
+        apiClient.replaceTokens(baseUrl, textId, sentenceId, tokens.map { it.toInputDto() })
+            .map { it.toDomain() }
 }

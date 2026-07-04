@@ -54,6 +54,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonihacks.qalam.domain.model.TextPassage
 import com.tonihacks.qalam.domain.model.TextSentence
 import com.tonihacks.qalam.domain.model.TextToken
+import com.tonihacks.qalam.domain.model.WordDraft
+import com.tonihacks.qalam.ui.words.AddWordSheet
 import com.tonihacks.qalam.ui.theme.Amiri
 import com.tonihacks.qalam.ui.theme.NewsReader
 import com.tonihacks.qalam.ui.theme.QalamInk
@@ -90,8 +92,12 @@ fun TextReaderScreen(
         is TextReaderUiState.Success -> TextReaderContent(
             text = s.text,
             sentences = s.sentences,
+            isLinkingWord = s.isLinkingWord,
+            linkWordError = s.linkWordError,
             onBack = onBack,
             onNavigateToWord = onNavigateToWord,
+            onAddToVocabulary = viewModel::addTokenToVocabulary,
+            onClearLinkError = viewModel::clearLinkError,
         )
     }
 }
@@ -101,11 +107,16 @@ fun TextReaderScreen(
 private fun TextReaderContent(
     text: TextPassage,
     sentences: List<TextSentence>,
+    isLinkingWord: Boolean,
+    linkWordError: String?,
     onBack: () -> Unit,
     onNavigateToWord: (String) -> Unit,
+    onAddToVocabulary: (TextToken, WordDraft, () -> Unit) -> Unit,
+    onClearLinkError: () -> Unit,
 ) {
     var mode by remember { mutableStateOf(ReaderMode.INTERLINEAR) }
     var selectedToken by remember { mutableStateOf<TextToken?>(null) }
+    var showAddWordFor by remember { mutableStateOf<TextToken?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         // 1. Top bar
@@ -240,6 +251,29 @@ private fun TextReaderContent(
                 selectedToken = null
                 onNavigateToWord(wordId)
             },
+            onAddToVocabulary = {
+                selectedToken = null
+                onClearLinkError()
+                showAddWordFor = token
+            },
+        )
+    }
+
+    showAddWordFor?.let { token ->
+        AddWordSheet(
+            isSaving = isLinkingWord,
+            errorMessage = linkWordError,
+            onDismiss = {
+                showAddWordFor = null
+                onClearLinkError()
+            },
+            onSave = { draft ->
+                onAddToVocabulary(token, draft) { showAddWordFor = null }
+            },
+            initialArabic = token.arabic,
+            initialTranslation = token.translation.orEmpty(),
+            initialTransliteration = token.transliteration.orEmpty(),
+            initialDialect = text.dialect,
         )
     }
 }
@@ -283,7 +317,12 @@ private fun TokenCell(token: TextToken, onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TokenBottomSheet(token: TextToken, onDismiss: () -> Unit, onViewEntry: (String) -> Unit) {
+private fun TokenBottomSheet(
+    token: TextToken,
+    onDismiss: () -> Unit,
+    onViewEntry: (String) -> Unit,
+    onAddToVocabulary: () -> Unit,
+) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = QalamPaper,
@@ -319,6 +358,13 @@ private fun TokenBottomSheet(token: TextToken, onDismiss: () -> Unit, onViewEntr
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(18.dp),
                 ) { Text("View full entry") }
+            } else {
+                Spacer(Modifier.height(20.dp))
+                Button(
+                    onClick = onAddToVocabulary,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(18.dp),
+                ) { Text("Add to vocabulary") }
             }
         }
     }

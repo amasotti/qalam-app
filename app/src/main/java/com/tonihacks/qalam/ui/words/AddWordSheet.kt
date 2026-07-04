@@ -41,12 +41,16 @@ fun AddWordSheet(
     errorMessage: String?,
     onDismiss: () -> Unit,
     onSave: (WordDraft) -> Unit,
+    initialArabic: String = "",
+    initialTranslation: String = "",
+    initialTransliteration: String = "",
+    initialDialect: String = "MSA",
 ) {
-    var arabic by remember { mutableStateOf("") }
-    var translation by remember { mutableStateOf("") }
-    var transliteration by remember { mutableStateOf("") }
+    var arabic by remember { mutableStateOf(initialArabic) }
+    var translation by remember { mutableStateOf(initialTranslation) }
+    var transliteration by remember { mutableStateOf(initialTransliteration) }
     var partOfSpeech by remember { mutableStateOf("UNKNOWN") }
-    var dialect by remember { mutableStateOf("MSA") }
+    var dialect by remember { mutableStateOf(initialDialect) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

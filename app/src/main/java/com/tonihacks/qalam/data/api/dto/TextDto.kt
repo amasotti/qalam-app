@@ -29,6 +29,20 @@ data class TokenDto(
 )
 
 @Serializable
+data class TokenInputDto(
+    val position: Int,
+    val arabic: String,
+    val transliteration: String? = null,
+    val translation: String? = null,
+    val wordId: String? = null,
+)
+
+@Serializable
+data class ReplaceTokensRequestDto(
+    val tokens: List<TokenInputDto>,
+)
+
+@Serializable
 data class SentenceDto(
     val id: String,
     val textId: String,
@@ -52,6 +66,15 @@ fun TextDto.toDomain() = TextPassage(
 
 fun TokenDto.toDomain() = TextToken(
     id = id,
+    sentenceId = sentenceId,
+    position = position,
+    arabic = arabic,
+    transliteration = transliteration,
+    translation = translation,
+    wordId = wordId,
+)
+
+fun TextToken.toInputDto() = TokenInputDto(
     position = position,
     arabic = arabic,
     transliteration = transliteration,

@@ -4,8 +4,10 @@ import com.tonihacks.qalam.data.api.dto.AnalyticsOverviewDto
 import com.tonihacks.qalam.data.api.dto.DictionaryLinkDto
 import com.tonihacks.qalam.data.api.dto.ExampleDto
 import com.tonihacks.qalam.data.api.dto.PagedResponseDto
+import com.tonihacks.qalam.data.api.dto.ReplaceTokensRequestDto
 import com.tonihacks.qalam.data.api.dto.RootDto
 import com.tonihacks.qalam.data.api.dto.SentenceDto
+import com.tonihacks.qalam.data.api.dto.TokenInputDto
 import com.tonihacks.qalam.data.api.dto.RecordTrainingResultRequestDto
 import com.tonihacks.qalam.data.api.dto.RecordTrainingResultResponseDto
 import com.tonihacks.qalam.data.api.dto.StartTrainingSessionRequestDto
@@ -16,11 +18,14 @@ import com.tonihacks.qalam.data.api.dto.WordDraftDto
 import com.tonihacks.qalam.data.api.dto.WordDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -76,6 +81,17 @@ class ApiClient @Inject constructor(
         }.body()
     }
 
+    /** Exact Arabic match. Returns null on 404 (no word with that surface form). */
+    suspend fun getWordByArabic(baseUrl: String, arabicText: String): Result<WordDto?> = runCatching {
+        try {
+            httpClient.get("$baseUrl/api/v1/words/by-arabic") {
+                parameter("q", arabicText)
+            }.body<WordDto>()
+        } catch (e: ClientRequestException) {
+            if (e.response.status == HttpStatusCode.NotFound) null else throw e
+        }
+    }
+
     // -------------- ROOTS -----------------
     suspend fun getRoots(
         baseUrl: String,
@@ -115,6 +131,18 @@ class ApiClient @Inject constructor(
 
     suspend fun getSentences(baseUrl: String, textId: String): Result<List<SentenceDto>> = runCatching {
         httpClient.get("$baseUrl/api/v1/texts/$textId/sentences").body()
+    }
+
+    suspend fun replaceTokens(
+        baseUrl: String,
+        textId: String,
+        sentenceId: String,
+        tokens: List<TokenInputDto>,
+    ): Result<SentenceDto> = runCatching {
+        httpClient.put("$baseUrl/api/v1/texts/$textId/sentences/$sentenceId/tokens") {
+            contentType(ContentType.Application.Json)
+            setBody(ReplaceTokensRequestDto(tokens))
+        }.body()
     }
 
     // -------------- TRAINING -----------------

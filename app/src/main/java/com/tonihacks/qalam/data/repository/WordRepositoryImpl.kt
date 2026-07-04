@@ -39,6 +39,9 @@ class WordRepositoryImpl @Inject constructor(
     override suspend fun getWord(baseUrl: String, id: String): Result<Word> =
         apiClient.getWord(baseUrl, id).map { it.toDomain() }
 
+    override suspend fun getWordByArabic(baseUrl: String, arabicText: String): Result<Word?> =
+        apiClient.getWordByArabic(baseUrl, arabicText).map { it?.toDomain() }
+
     override suspend fun getExamples(baseUrl: String, wordId: String): Result<List<Example>> =
         apiClient.getExamples(baseUrl, wordId).map { list -> list.map { it.toDomain() } }
 

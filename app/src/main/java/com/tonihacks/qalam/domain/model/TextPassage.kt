@@ -22,6 +22,7 @@ data class TextSentence(
 
 data class TextToken(
     val id: String,
+    val sentenceId: String,
     val position: Int,
     val arabic: String,
     val transliteration: String?,
