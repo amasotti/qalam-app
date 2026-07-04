@@ -123,6 +123,8 @@ class WordListViewModelTest {
             rootId: String?,
             page: Int,
             size: Int,
+            sortBy: String,
+            sortDesc: Boolean,
         ): Result<PagedResult<Word>> = wordsResult
 
         override suspend fun getWord(baseUrl: String, id: String): Result<Word> =

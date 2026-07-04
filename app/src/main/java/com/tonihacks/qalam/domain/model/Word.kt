@@ -11,6 +11,8 @@ data class Word(
     val rootId: String?,
     val notes: String?,
     val pronunciationUrl: String?,
+    val createdAt: String? = null,
+    val updatedAt: String? = null,
     val dictionaries: List<DictionaryLink> = emptyList(),
 )
 

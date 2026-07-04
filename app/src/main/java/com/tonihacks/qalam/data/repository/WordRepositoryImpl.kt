@@ -25,8 +25,10 @@ class WordRepositoryImpl @Inject constructor(
         rootId: String?,
         page: Int,
         size: Int,
+        sortBy: String,
+        sortDesc: Boolean,
     ): Result<PagedResult<Word>> =
-        apiClient.getWords(baseUrl, query, masteryLevel, rootId, page, size).map { dto ->
+        apiClient.getWords(baseUrl, query, masteryLevel, rootId, page, size, sortBy, sortDesc).map { dto ->
             PagedResult(
                 items = dto.items.map { it.toDomain() },
                 total = dto.total,

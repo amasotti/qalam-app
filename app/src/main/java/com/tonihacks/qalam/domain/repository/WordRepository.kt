@@ -10,6 +10,8 @@ interface WordRepository {
         rootId: String? = null,
         page: Int = 0,
         size: Int = 20,
+        sortBy: String = "UPDATED_AT",
+        sortDesc: Boolean = true,
     ): Result<PagedResult<Word>>
 
     suspend fun getWord(baseUrl: String, id: String): Result<Word>

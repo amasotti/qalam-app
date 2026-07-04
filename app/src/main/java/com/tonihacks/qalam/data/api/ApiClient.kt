@@ -42,6 +42,8 @@ class ApiClient @Inject constructor(
         rootId: String? = null,
         page: Int = 0,
         size: Int = 20,
+        sortBy: String = "UPDATED_AT",
+        sortDesc: Boolean = true,
     ): Result<PagedResponseDto<WordDto>> = runCatching {
         httpClient.get("$baseUrl/api/v1/words") {
             parameter("page", page)
@@ -49,6 +51,8 @@ class ApiClient @Inject constructor(
             if (!query.isNullOrEmpty()) parameter("q", query)
             if (!masteryLevel.isNullOrEmpty()) parameter("masteryLevel", masteryLevel)
             if (!rootId.isNullOrEmpty()) parameter("rootId", rootId)
+            parameter("sortBy", sortBy)
+            parameter("sortDesc", sortDesc)
         }.body()
     }
 

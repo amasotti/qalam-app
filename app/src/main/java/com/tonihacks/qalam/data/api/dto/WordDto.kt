@@ -16,6 +16,8 @@ data class WordDto(
     val rootId: String? = null,
     val notes: String? = null,
     val pronunciationUrl: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null,
 )
 
 @Serializable
@@ -45,6 +47,8 @@ fun WordDto.toDomain() = Word(
     rootId = rootId,
     notes = notes,
     pronunciationUrl = pronunciationUrl,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
 )
 
 fun ExampleDto.toDomain() = Example(id, arabic, transliteration, translation)

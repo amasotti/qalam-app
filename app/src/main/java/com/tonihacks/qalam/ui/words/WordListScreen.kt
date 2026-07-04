@@ -23,6 +23,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonihacks.qalam.domain.model.MasteryLevel
 import com.tonihacks.qalam.domain.model.Word
 import com.tonihacks.qalam.ui.theme.*
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun WordListScreen(
@@ -201,6 +204,9 @@ private fun WordRow(word: Word, onClick: () -> Unit) {
             word.translation?.let {
                 Text(it, style = Typography.bodyMedium, color = QalamInk)
             }
+            word.updatedAt?.toFormattedDate()?.let {
+                Text(it, style = Typography.labelSmall, color = QalamInk3)
+            }
         }
         // Arabic text right-aligned — Amiri large
         Text(
@@ -209,6 +215,12 @@ private fun WordRow(word: Word, onClick: () -> Unit) {
         )
     }
 }
+
+private val DATE_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
+
+private fun String.toFormattedDate(): String? = runCatching {
+    DATE_FMT.format(Instant.parse(this).atZone(ZoneId.systemDefault()).toLocalDate())
+}.getOrNull()
 
 // Helper extensions — keep near the composables that use them
 fun MasteryLevel?.toQalamColor() = when (this) {
