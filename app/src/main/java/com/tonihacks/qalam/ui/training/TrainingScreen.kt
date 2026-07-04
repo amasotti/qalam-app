@@ -1,8 +1,10 @@
 package com.tonihacks.qalam.ui.training
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,8 +42,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,6 +79,7 @@ import com.tonihacks.qalam.ui.theme.QalamSurface2
 import com.tonihacks.qalam.ui.theme.QalamSurface3
 import com.tonihacks.qalam.ui.theme.QalamTerra
 import com.tonihacks.qalam.ui.theme.Typography
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
@@ -227,34 +231,68 @@ private fun TrainingCard(
     onReveal: () -> Unit,
     onGrade: (Boolean) -> Unit,
 ) {
-    var dragX by remember(word.id) { mutableFloatStateOf(0f) }
-    val animatedDragX by animateFloatAsState(targetValue = dragX, label = "card_drag_x")
-    val thresholdPx = with(LocalDensity.current) { 90.dp.toPx() }
-    val knewOpacity = (animatedDragX / thresholdPx).coerceIn(0f, 1f)
-    val againOpacity = (-animatedDragX / thresholdPx).coerceIn(0f, 1f)
+    val dragX = remember(word.id) { Animatable(0f) }
+    var isExiting by remember(word.id) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val density = LocalDensity.current
+    val thresholdPx = with(density) { 150.dp.toPx() }
+    val exitDistancePx = with(density) { 760.dp.toPx() }
+    val knewOpacity = if (isRevealed) (dragX.value / thresholdPx).coerceIn(0f, 1f) else 0f
+    val againOpacity = if (isRevealed) (-dragX.value / thresholdPx).coerceIn(0f, 1f) else 0f
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(430.dp)
             .graphicsLayer {
-                translationX = animatedDragX
-                rotationZ = animatedDragX * 0.04f
+                translationX = dragX.value
+                rotationZ = dragX.value * 0.025f
             }
-            .pointerInput(word.id, isRevealed) {
+            .clickable(enabled = !isRevealed && !isExiting, onClick = onReveal)
+            .pointerInput(word.id, isRevealed, isExiting) {
                 detectDragGestures(
                     onDrag = { change, dragAmount ->
                         change.consume()
-                        dragX += dragAmount.x
+                        if (!isExiting) {
+                            scope.launch {
+                                dragX.snapTo(dragX.value + dragAmount.x)
+                            }
+                        }
                     },
                     onDragEnd = {
-                        when {
-                            dragX > thresholdPx -> onGrade(true)
-                            dragX < -thresholdPx -> onGrade(false)
+                        val grade = when {
+                            isRevealed && dragX.value > thresholdPx -> true
+                            isRevealed && dragX.value < -thresholdPx -> false
+                            else -> null
                         }
-                        dragX = 0f
+
+                        scope.launch {
+                            if (grade == null) {
+                                dragX.animateTo(
+                                    targetValue = 0f,
+                                    animationSpec = tween(durationMillis = 120),
+                                )
+                                return@launch
+                            }
+
+                            isExiting = true
+                            dragX.animateTo(
+                                targetValue = if (grade) exitDistancePx else -exitDistancePx,
+                                animationSpec = tween(durationMillis = 120),
+                            )
+                            onGrade(grade)
+                            dragX.snapTo(0f)
+                            isExiting = false
+                        }
                     },
-                    onDragCancel = { dragX = 0f },
+                    onDragCancel = {
+                        scope.launch {
+                            dragX.animateTo(
+                                targetValue = 0f,
+                                animationSpec = tween(durationMillis = 120),
+                            )
+                        }
+                    },
                 )
             },
         colors = CardDefaults.cardColors(containerColor = QalamSurface),
@@ -514,7 +552,11 @@ private fun TrainingControls(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            "Swipe right if you knew it · left to review again",
+            if (isRevealed) {
+                "Swipe right if you knew it · left to review again"
+            } else {
+                "Tap the card or show answer"
+            },
             style = Typography.bodySmall,
             color = QalamInk3,
             textAlign = TextAlign.Center,

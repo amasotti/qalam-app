@@ -81,13 +81,13 @@ Store deck in `TrainingViewModel`.
 ```
 onDrag: update dragX offset
 onDragEnd:
-  if dragX > 90dp → grade correct (swipe right)
-  if dragX < -90dp → grade incorrect (swipe left)
+  if revealed && dragX > 150dp → animate card out quickly, then grade correct (swipe right)
+  if revealed && dragX < -150dp → animate card out quickly, then grade incorrect (swipe left)
   else → spring back to 0
 ```
-"KNEW IT ✓" badge: left side, opacity = `(dragX / 90).coerceIn(0f, 1f)`
-"AGAIN ↻" badge: right side, opacity = `(-dragX / 90).coerceIn(0f, 1f)`
-Card rotation: `dragX * 0.04f` degrees
+"KNEW IT ✓" badge: left side, opacity = `(dragX / 150).coerceIn(0f, 1f)`
+"AGAIN ↻" badge: right side, opacity = `(-dragX / 150).coerceIn(0f, 1f)`
+Card rotation: `dragX * 0.025f` degrees
 
 After grading: `POST /api/v1/training/sessions/{id}/results` with word result.
 
