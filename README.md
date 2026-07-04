@@ -14,6 +14,19 @@ Native Android companion to [Qalam](https://github.com/amasotti/qalam) — a per
 vocabulary and text-study tool. Single user, read-and-train focused. Talks to the Ktor backend
 over Tailscale (no Play Store, sideloaded only).
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/assets/home_screen.png" width="220"/><br/><sub>Home</sub></td>
+    <td align="center"><img src="docs/assets/word.png" width="220"/><br/><sub>Word detail</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/assets/interlinear_text.png" width="220"/><br/><sub>Interlinear reader</sub></td>
+    <td align="center"><img src="docs/assets/training_card.png" width="220"/><br/><sub>Training / SRS</sub></td>
+  </tr>
+</table>
+
 ## What it does
 
 | Screen | Purpose |
