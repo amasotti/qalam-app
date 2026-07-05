@@ -16,6 +16,7 @@ import kotlinx.serialization.Serializable
 data class StartTrainingSessionRequestDto(
     val mode: String,
     val size: Int,
+    val wordListIds: List<String> = emptyList(),
 )
 
 @Serializable

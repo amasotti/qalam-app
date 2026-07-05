@@ -68,6 +68,7 @@ import com.tonihacks.qalam.domain.model.MasteryPromotion
 import com.tonihacks.qalam.domain.model.TrainingSessionSummary
 import com.tonihacks.qalam.domain.model.TrainingWord
 import com.tonihacks.qalam.domain.model.TrainingWordRelation
+import com.tonihacks.qalam.domain.model.WordListSummary
 import com.tonihacks.qalam.ui.theme.MasteryLearning
 import com.tonihacks.qalam.ui.theme.MasteryMastered
 import com.tonihacks.qalam.ui.theme.MasteryReviewing
@@ -108,6 +109,7 @@ fun TrainingRoute(
         state = state,
         onClose = onClose,
         onStartTraining = viewModel::startSession,
+        onRetryWordLists = viewModel::loadWordLists,
         onTrainAgain = viewModel::resetSession,
         onReveal = viewModel::revealAnswer,
         onGrade = viewModel::submitCurrentResult,
@@ -118,7 +120,8 @@ fun TrainingRoute(
 fun TrainingScreen(
     state: TrainingUiState,
     onClose: () -> Unit,
-    onStartTraining: (String, Int) -> Unit,
+    onStartTraining: (String, Int, List<String>) -> Unit,
+    onRetryWordLists: () -> Unit,
     onTrainAgain: () -> Unit,
     onReveal: () -> Unit,
     onGrade: (Boolean) -> Unit,
@@ -133,8 +136,10 @@ fun TrainingScreen(
             state.isLoading -> TrainingLoading()
             state.error != null && state.session == null -> TrainingError(state.error, onClose)
             state.session == null -> TrainingSetupScreen(
+                state = state,
                 onClose = onClose,
                 onStartTraining = onStartTraining,
+                onRetryWordLists = onRetryWordLists,
             )
             state.session.words.isEmpty() -> TrainingEmpty(onClose)
             state.isComplete -> TrainingComplete(state, onClose, onTrainAgain)
@@ -158,11 +163,14 @@ private val TrainingSizeOptions = listOf(5, 10, 20, 30, 50)
 
 @Composable
 private fun TrainingSetupScreen(
+    state: TrainingUiState,
     onClose: () -> Unit,
-    onStartTraining: (String, Int) -> Unit,
+    onStartTraining: (String, Int, List<String>) -> Unit,
+    onRetryWordLists: () -> Unit,
 ) {
     var selectedMode by remember { mutableStateOf(TrainingModeOption.Mixed) }
     var selectedSize by remember { mutableStateOf(20) }
+    var selectedWordListIds by remember { mutableStateOf(emptySet<String>()) }
 
     Column(
         modifier = Modifier
@@ -179,6 +187,25 @@ private fun TrainingSetupScreen(
                 Icon(Icons.Outlined.Close, contentDescription = "Close training", tint = QalamInk)
             }
         }
+
+        Spacer(Modifier.height(28.dp))
+        Text("Scope", style = Typography.labelLarge, color = QalamInk2)
+        Spacer(Modifier.height(10.dp))
+        TrainingScopePicker(
+            lists = state.wordLists,
+            selectedIds = selectedWordListIds,
+            isLoading = state.isLoadingWordLists,
+            error = state.wordListError,
+            onRetry = onRetryWordLists,
+            onSelectAll = { selectedWordListIds = emptySet() },
+            onToggleList = { id ->
+                selectedWordListIds = if (id in selectedWordListIds) {
+                    selectedWordListIds - id
+                } else {
+                    selectedWordListIds + id
+                }
+            },
+        )
 
         Spacer(Modifier.height(28.dp))
         Text("Mode", style = Typography.labelLarge, color = QalamInk2)
@@ -210,7 +237,7 @@ private fun TrainingSetupScreen(
 
         Spacer(Modifier.height(32.dp))
         Button(
-            onClick = { onStartTraining(selectedMode.value, selectedSize) },
+            onClick = { onStartTraining(selectedMode.value, selectedSize, selectedWordListIds.toList()) },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = QalamPrimary,
@@ -224,19 +251,72 @@ private fun TrainingSetupScreen(
 }
 
 @Composable
+private fun TrainingScopePicker(
+    lists: List<WordListSummary>,
+    selectedIds: Set<String>,
+    isLoading: Boolean,
+    error: String?,
+    onRetry: () -> Unit,
+    onSelectAll: () -> Unit,
+    onToggleList: (String) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        SetupOptionButton(
+            title = "All vocabulary",
+            description = if (selectedIds.isEmpty()) "Using the whole pool" else "Clear selected lists",
+            selected = selectedIds.isEmpty(),
+            onClick = onSelectAll,
+        )
+        when {
+            isLoading -> Text("Loading lists...", style = Typography.bodySmall, color = QalamInk2)
+            error != null -> Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(QalamTerraC, RoundedCornerShape(8.dp))
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(error, modifier = Modifier.weight(1f), style = Typography.bodySmall, color = QalamInk)
+                OutlinedButton(onClick = onRetry) { Text("Retry", style = Typography.labelLarge) }
+            }
+            lists.isEmpty() -> Text("No word lists yet.", style = Typography.bodySmall, color = QalamInk2)
+            else -> lists.forEach { list ->
+                SetupOptionButton(
+                    title = list.title,
+                    description = "${list.itemCount} word${if (list.itemCount == 1) "" else "s"}",
+                    selected = list.id in selectedIds,
+                    enabled = list.itemCount > 0,
+                    onClick = { onToggleList(list.id) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun SetupOptionButton(
     title: String,
     description: String,
     selected: Boolean,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    val container = if (selected) QalamPrimaryC else QalamSurface
-    val titleColor = if (selected) QalamPrimary else QalamInk
+    val container = when {
+        !enabled -> QalamSurface2
+        selected -> QalamPrimaryC
+        else -> QalamSurface
+    }
+    val titleColor = when {
+        !enabled -> QalamInk3
+        selected -> QalamPrimary
+        else -> QalamInk
+    }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = container),
         shape = RoundedCornerShape(8.dp),
     ) {

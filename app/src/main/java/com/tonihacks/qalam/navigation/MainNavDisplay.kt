@@ -11,6 +11,8 @@ import com.tonihacks.qalam.ui.settings.SettingsScreen
 import com.tonihacks.qalam.ui.texts.TextListScreen
 import com.tonihacks.qalam.ui.texts.TextReaderScreen
 import com.tonihacks.qalam.ui.training.TrainingRoute
+import com.tonihacks.qalam.ui.wordlists.WordListDetailScreen
+import com.tonihacks.qalam.ui.wordlists.WordListsScreen
 import com.tonihacks.qalam.ui.words.WordDetailScreen
 import com.tonihacks.qalam.ui.words.WordListScreen
 
@@ -35,7 +37,23 @@ fun MainNavDisplay(
                 )
             }
             entry<WordList> {
-                WordListScreen(onNavigateToWord = { id -> backStack.add(WordDetail(id)) })
+                WordListScreen(
+                    onNavigateToWord = { id -> backStack.add(WordDetail(id)) },
+                    onNavigateToLists = { backStack.add(VocabularyLists) },
+                )
+            }
+            entry<VocabularyLists> {
+                WordListsScreen(
+                    onBack = { backStack.removeLastOrNull() },
+                    onNavigateToList = { id -> backStack.add(VocabularyListDetail(id)) },
+                )
+            }
+            entry<VocabularyListDetail> { dest ->
+                WordListDetailScreen(
+                    listId = dest.listId,
+                    onBack = { backStack.removeLastOrNull() },
+                    onNavigateToWord = { id -> backStack.add(WordDetail(id)) },
+                )
             }
             entry<WordDetail> { dest ->
                 WordDetailScreen(

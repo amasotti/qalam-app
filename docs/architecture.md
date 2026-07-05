@@ -55,9 +55,10 @@ never hand-invent types. (Dev spec: `http://localhost:8085/api/v1/swagger-ui/doc
 | Words | `GET /api/v1/words` (`q`, `masteryLevel`, `rootId`, `sortBy`, `page`, `size`) · `GET /words/{id}` · `GET /words/by-arabic` · `POST /words` |
 | Word examples | `GET /words/{id}/examples` · `POST /words/{id}/examples` · `POST /words/{id}/examples/generate` (AI) |
 | Word links | `GET /words/{id}/dictionary-links` |
+| Word lists | `GET/POST /api/v1/word-lists` · `GET/DELETE /word-lists/{id}` · `POST /word-lists/{id}/words` · `DELETE /word-lists/{id}/words/{wordId}` · `POST /word-lists/{id}/suggest` (AI) |
 | Roots | `GET /api/v1/roots` · `GET /roots/{id}` (form count derived from a root-filtered word list) |
 | Texts | `GET /api/v1/texts` · `GET /texts/{id}` · `GET /texts/{id}/sentences` · `GET/POST /texts/{id}/annotations` |
-| Training | `POST /api/v1/training/sessions` · `POST /sessions/{id}/results` · `POST /sessions/{id}/complete` |
+| Training | `POST /api/v1/training/sessions` (`mode`, `size`, optional `wordListIds`) · `POST /sessions/{id}/results` · `POST /sessions/{id}/complete` |
 | Analytics | `GET /api/v1/analytics/overview` |
 | AI insight | `POST /api/v1/ai/insight` (`entityType`, `entityId`, `mode`) |
 
