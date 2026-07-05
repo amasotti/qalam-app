@@ -39,6 +39,7 @@ import com.tonihacks.qalam.data.api.dto.WordRelationDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -135,7 +136,9 @@ class ApiClient @Inject constructor(
     }
 
     suspend fun generateExamples(baseUrl: String, wordId: String): Result<AiExamplesResponseDto> = runCatching {
-        httpClient.post("$baseUrl/api/v1/words/$wordId/examples/generate").body()
+        httpClient.post("$baseUrl/api/v1/words/$wordId/examples/generate") {
+            aiRequestTimeout()
+        }.body()
     }
 
     suspend fun getDictionaryLinks(baseUrl: String, wordId: String): Result<List<DictionaryLinkDto>> = runCatching {
@@ -248,7 +251,9 @@ class ApiClient @Inject constructor(
     }
 
     suspend fun enrichWord(baseUrl: String, wordId: String): Result<WordEnrichmentSuggestionDto> = runCatching {
-        httpClient.post("$baseUrl/api/v1/words/$wordId/enrich").body()
+        httpClient.post("$baseUrl/api/v1/words/$wordId/enrich") {
+            aiRequestTimeout()
+        }.body()
     }
 
     // -------------- WORD LISTS -----------------
@@ -295,7 +300,9 @@ class ApiClient @Inject constructor(
 
     suspend fun suggestWordsForList(baseUrl: String, listId: String): Result<WordListSuggestionsResponseDto> =
         runCatching {
-            httpClient.post("$baseUrl/api/v1/word-lists/$listId/suggest").body()
+            httpClient.post("$baseUrl/api/v1/word-lists/$listId/suggest") {
+                aiRequestTimeout()
+            }.body()
         }
 
     // -------------- ROOTS -----------------
@@ -392,8 +399,19 @@ class ApiClient @Inject constructor(
     // -------------- AI -----------------
     suspend fun generateInsight(baseUrl: String, request: InsightRequestDto): Result<InsightResponseDto> = runCatching {
         httpClient.post("$baseUrl/api/v1/ai/insight") {
+            aiRequestTimeout()
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
+    }
+
+    private fun io.ktor.client.request.HttpRequestBuilder.aiRequestTimeout() {
+        timeout {
+            requestTimeoutMillis = AI_REQUEST_TIMEOUT_MILLIS
+        }
+    }
+
+    private companion object {
+        const val AI_REQUEST_TIMEOUT_MILLIS = 90_000L
     }
 }
