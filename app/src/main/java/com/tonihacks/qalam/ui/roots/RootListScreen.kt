@@ -16,8 +16,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +48,7 @@ import com.tonihacks.qalam.ui.theme.QalamPrimary
 import com.tonihacks.qalam.ui.theme.QalamTerra
 import com.tonihacks.qalam.ui.theme.Typography
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RootListScreen(
     onNavigateToRoot: (String) -> Unit,
@@ -88,30 +91,36 @@ fun RootListScreen(
             modifier = Modifier.padding(horizontal = 20.dp).padding(bottom = 8.dp),
         )
 
-        LazyColumn(
-            state = listState,
+        PullToRefreshBox(
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = viewModel::refresh,
             modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(bottom = 20.dp),
         ) {
-            items(uiState.items, key = { it.root.id }) { item ->
-                RootRow(item = item, onClick = { onNavigateToRoot(item.root.id) })
-                HorizontalDivider(color = QalamOutline, thickness = 0.5.dp)
-            }
-            if (uiState.isLoading) {
-                item {
-                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = QalamPrimary)
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 20.dp),
+            ) {
+                items(uiState.items, key = { it.root.id }) { item ->
+                    RootRow(item = item, onClick = { onNavigateToRoot(item.root.id) })
+                    HorizontalDivider(color = QalamOutline, thickness = 0.5.dp)
+                }
+                if (uiState.isLoading) {
+                    item {
+                        Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = QalamPrimary)
+                        }
                     }
                 }
-            }
-            uiState.error?.let { err ->
-                item {
-                    Text(
-                        err,
-                        color = QalamTerra,
-                        modifier = Modifier.padding(20.dp),
-                        style = Typography.bodyMedium,
-                    )
+                uiState.error?.let { err ->
+                    item {
+                        Text(
+                            err,
+                            color = QalamTerra,
+                            modifier = Modifier.padding(20.dp),
+                            style = Typography.bodyMedium,
+                        )
+                    }
                 }
             }
         }

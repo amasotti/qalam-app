@@ -20,6 +20,7 @@ import javax.inject.Inject
 data class RootListUiState(
     val items: List<RootListItem> = emptyList(),
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val error: String? = null,
     val hasMore: Boolean = true,
     val currentPage: Int = 1,
@@ -45,6 +46,11 @@ class RootListViewModel @Inject constructor(
         load()
     }
 
+    fun refresh() {
+        _uiState.update { it.copy(items = emptyList(), currentPage = 1, hasMore = true, isRefreshing = true) }
+        load()
+    }
+
     private fun load() {
         val state = _uiState.value
         viewModelScope.launch {
@@ -56,6 +62,7 @@ class RootListViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
+                        isRefreshing = false,
                         error = rootsResult.exceptionOrNull()?.message ?: "Failed to load roots",
                     )
                 }
@@ -79,6 +86,7 @@ class RootListViewModel @Inject constructor(
                 current.copy(
                     items = current.items + rootItems,
                     isLoading = false,
+                    isRefreshing = false,
                     hasMore = rootsPage.hasMore,
                     currentPage = current.currentPage + 1,
                 )

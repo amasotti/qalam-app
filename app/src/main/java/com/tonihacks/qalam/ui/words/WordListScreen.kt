@@ -14,6 +14,8 @@ import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
@@ -27,6 +29,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WordListScreen(
     onNavigateToWord: (String) -> Unit,
@@ -112,30 +115,36 @@ fun WordListScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            LazyColumn(
-                state = listState,
+            PullToRefreshBox(
+                isRefreshing = uiState.isRefreshing,
+                onRefresh = viewModel::refresh,
                 modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(bottom = 80.dp),
             ) {
-                items(uiState.items, key = { it.id }) { word ->
-                    WordRow(word = word, onClick = { onNavigateToWord(word.id) })
-                    HorizontalDivider(color = QalamOutline, thickness = 0.5.dp)
-                }
-                if (uiState.isLoading) {
-                    item {
-                        Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = QalamPrimary)
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 80.dp),
+                ) {
+                    items(uiState.items, key = { it.id }) { word ->
+                        WordRow(word = word, onClick = { onNavigateToWord(word.id) })
+                        HorizontalDivider(color = QalamOutline, thickness = 0.5.dp)
+                    }
+                    if (uiState.isLoading) {
+                        item {
+                            Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(color = QalamPrimary)
+                            }
                         }
                     }
-                }
-                uiState.error?.let { err ->
-                    item {
-                        Text(
-                            err,
-                            color = QalamTerra,
-                            modifier = Modifier.padding(20.dp),
-                            style = Typography.bodyMedium,
-                        )
+                    uiState.error?.let { err ->
+                        item {
+                            Text(
+                                err,
+                                color = QalamTerra,
+                                modifier = Modifier.padding(20.dp),
+                                style = Typography.bodyMedium,
+                            )
+                        }
                     }
                 }
             }

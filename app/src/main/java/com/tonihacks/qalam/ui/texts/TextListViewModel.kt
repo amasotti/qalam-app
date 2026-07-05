@@ -17,6 +17,7 @@ import javax.inject.Inject
 data class TextListUiState(
     val items: List<TextPassage> = emptyList(),
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val error: String? = null,
     val hasMore: Boolean = true,
     val currentPage: Int = 1,
@@ -41,6 +42,11 @@ class TextListViewModel @Inject constructor(
         load()
     }
 
+    fun refresh() {
+        _uiState.update { it.copy(items = emptyList(), currentPage = 1, hasMore = true, isRefreshing = true) }
+        load()
+    }
+
     private fun load() {
         val s = _uiState.value
         viewModelScope.launch {
@@ -52,13 +58,14 @@ class TextListViewModel @Inject constructor(
                         cur.copy(
                             items = cur.items + paged.items,
                             isLoading = false,
+                            isRefreshing = false,
                             hasMore = paged.hasMore,
                             currentPage = cur.currentPage + 1,
                         )
                     }
                 },
                 onFailure = { err ->
-                    _uiState.update { it.copy(isLoading = false, error = err.message) }
+                    _uiState.update { it.copy(isLoading = false, isRefreshing = false, error = err.message) }
                 },
             )
         }
