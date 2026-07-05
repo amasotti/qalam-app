@@ -7,7 +7,9 @@ import com.tonihacks.qalam.domain.model.TrainingSession
 import com.tonihacks.qalam.domain.model.TrainingSessionSummary
 import com.tonihacks.qalam.domain.model.TrainingWord
 import com.tonihacks.qalam.domain.model.TrainingWordResult
+import com.tonihacks.qalam.domain.model.WordListSummary
 import com.tonihacks.qalam.domain.repository.TrainingRepository
+import com.tonihacks.qalam.domain.repository.WordListRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +27,9 @@ data class TrainingUiState(
     val results: List<TrainingWordResult> = emptyList(),
     val summary: TrainingSessionSummary? = null,
     val error: String? = null,
+    val wordLists: List<WordListSummary> = emptyList(),
+    val isLoadingWordLists: Boolean = false,
+    val wordListError: String? = null,
 ) {
     val currentWord: TrainingWord?
         get() = session?.words?.getOrNull(currentIndex)
@@ -36,21 +41,41 @@ data class TrainingUiState(
 @HiltViewModel
 class TrainingViewModel @Inject constructor(
     private val trainingRepository: TrainingRepository,
+    private val wordListRepository: WordListRepository,
     private val prefs: PreferencesRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(TrainingUiState())
     val uiState: StateFlow<TrainingUiState> = _uiState.asStateFlow()
 
+    init {
+        loadWordLists()
+    }
+
     fun startSession(
         mode: String = "MIXED",
         size: Int = 20,
+        wordListIds: List<String> = emptyList(),
     ) {
         viewModelScope.launch {
-            _uiState.update { TrainingUiState(isLoading = true) }
+            _uiState.update {
+                TrainingUiState(
+                    isLoading = true,
+                    wordLists = it.wordLists,
+                    isLoadingWordLists = it.isLoadingWordLists,
+                    wordListError = it.wordListError,
+                )
+            }
             val baseUrl = prefs.baseUrl.first()
-            trainingRepository.startSession(baseUrl, mode, size).fold(
+            trainingRepository.startSession(baseUrl, mode, size, wordListIds).fold(
                 onSuccess = { session ->
-                    _uiState.update { TrainingUiState(session = session) }
+                    _uiState.update {
+                        TrainingUiState(
+                            session = session,
+                            wordLists = it.wordLists,
+                            isLoadingWordLists = it.isLoadingWordLists,
+                            wordListError = it.wordListError,
+                        )
+                    }
                 },
                 onFailure = { err ->
                     _uiState.update {
@@ -62,7 +87,38 @@ class TrainingViewModel @Inject constructor(
     }
 
     fun resetSession() {
-        _uiState.value = TrainingUiState()
+        val state = _uiState.value
+        _uiState.value = TrainingUiState(
+            wordLists = state.wordLists,
+            isLoadingWordLists = state.isLoadingWordLists,
+            wordListError = state.wordListError,
+        )
+    }
+
+    fun loadWordLists() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingWordLists = true, wordListError = null) }
+            val baseUrl = prefs.baseUrl.first()
+            wordListRepository.getWordLists(baseUrl, size = WORD_LIST_PAGE_SIZE).fold(
+                onSuccess = { result ->
+                    _uiState.update {
+                        it.copy(
+                            isLoadingWordLists = false,
+                            wordLists = result.items,
+                            wordListError = null,
+                        )
+                    }
+                },
+                onFailure = { err ->
+                    _uiState.update {
+                        it.copy(
+                            isLoadingWordLists = false,
+                            wordListError = err.message ?: "Could not load word lists",
+                        )
+                    }
+                },
+            )
+        }
     }
 
     fun revealAnswer() {
@@ -112,5 +168,9 @@ class TrainingViewModel @Inject constructor(
                 },
             )
         }
+    }
+
+    private companion object {
+        const val WORD_LIST_PAGE_SIZE = 500
     }
 }

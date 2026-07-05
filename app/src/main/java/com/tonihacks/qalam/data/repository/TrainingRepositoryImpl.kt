@@ -21,10 +21,11 @@ class TrainingRepositoryImpl @Inject constructor(
         baseUrl: String,
         mode: String,
         size: Int,
+        wordListIds: List<String>,
     ): Result<TrainingSession> =
         apiClient.startTrainingSession(
             baseUrl = baseUrl,
-            request = StartTrainingSessionRequestDto(mode = mode, size = size),
+            request = StartTrainingSessionRequestDto(mode = mode, size = size, wordListIds = wordListIds),
         ).map { it.toDomain() }
 
     override suspend fun submitResult(

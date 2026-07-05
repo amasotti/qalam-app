@@ -10,6 +10,7 @@ interface TrainingRepository {
         baseUrl: String,
         mode: String = "MIXED",
         size: Int = 20,
+        wordListIds: List<String> = emptyList(),
     ): Result<TrainingSession>
 
     suspend fun submitResult(

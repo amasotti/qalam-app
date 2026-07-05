@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
@@ -33,6 +34,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun WordListScreen(
     onNavigateToWord: (String) -> Unit,
+    onNavigateToLists: () -> Unit,
     viewModel: WordListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -54,17 +56,27 @@ fun WordListScreen(
         Column(modifier = Modifier.fillMaxSize()) {
             // Header
             Row(
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text("Words", style = Typography.displaySmall)
-                Spacer(Modifier.width(8.dp))
-                if (uiState.items.isNotEmpty()) {
-                    Text(
-                        "${uiState.items.size}+ entries",
-                        style = Typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                        color = QalamInk2,
-                    )
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text("Words", style = Typography.displaySmall)
+                    Spacer(Modifier.width(8.dp))
+                    if (uiState.items.isNotEmpty()) {
+                        Text(
+                            "${uiState.items.size}+ entries",
+                            style = Typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+                            color = QalamInk2,
+                        )
+                    }
+                }
+                OutlinedButton(onClick = onNavigateToLists) {
+                    Icon(Icons.AutoMirrored.Outlined.LibraryBooks, contentDescription = null)
+                    Spacer(Modifier.width(6.dp))
+                    Text("Lists", style = Typography.labelLarge)
                 }
             }
 

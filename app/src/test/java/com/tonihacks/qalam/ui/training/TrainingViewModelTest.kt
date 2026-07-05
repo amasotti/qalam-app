@@ -3,12 +3,18 @@ package com.tonihacks.qalam.ui.training
 import com.tonihacks.qalam.data.local.PreferencesRepository
 import com.tonihacks.qalam.domain.model.FlashcardSide
 import com.tonihacks.qalam.domain.model.MasteryLevel
+import com.tonihacks.qalam.domain.model.PagedResult
 import com.tonihacks.qalam.domain.model.RecordedTrainingResult
 import com.tonihacks.qalam.domain.model.TrainingSession
 import com.tonihacks.qalam.domain.model.TrainingSessionSummary
 import com.tonihacks.qalam.domain.model.TrainingWord
 import com.tonihacks.qalam.domain.model.TrainingWordResult
+import com.tonihacks.qalam.domain.model.WordListDetail
+import com.tonihacks.qalam.domain.model.WordListDraft
+import com.tonihacks.qalam.domain.model.WordListSuggestion
+import com.tonihacks.qalam.domain.model.WordListSummary
 import com.tonihacks.qalam.domain.repository.TrainingRepository
+import com.tonihacks.qalam.domain.repository.WordListRepository
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -31,12 +37,14 @@ class TrainingViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var repo: FakeTrainingRepository
+    private lateinit var wordListRepo: FakeWordListRepository
     private lateinit var prefs: PreferencesRepository
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         repo = FakeTrainingRepository()
+        wordListRepo = FakeWordListRepository()
         prefs = mockk()
         every { prefs.baseUrl } returns flowOf(BASE_URL)
     }
@@ -49,12 +57,13 @@ class TrainingViewModelTest {
     @Test
     fun `startSession stores returned session`() = runTest {
         repo.startResult = Result.success(aSession(words = listOf(aTrainingWord("w1"))))
-        val vm = TrainingViewModel(repo, prefs)
+        val vm = TrainingViewModel(repo, wordListRepo, prefs)
 
-        vm.startSession(mode = "LEARNING", size = 10)
+        vm.startSession(mode = "LEARNING", size = 10, wordListIds = listOf("list-1"))
 
         assertEquals("LEARNING", repo.lastMode)
         assertEquals(10, repo.lastSize)
+        assertEquals(listOf("list-1"), repo.lastWordListIds)
         assertEquals("session-1", vm.uiState.value.session?.id)
         assertFalse(vm.uiState.value.isLoading)
         assertNull(vm.uiState.value.error)
@@ -63,7 +72,7 @@ class TrainingViewModelTest {
     @Test
     fun `submitCurrentResult advances card and records local result`() = runTest {
         repo.startResult = Result.success(aSession(words = listOf(aTrainingWord("w1"), aTrainingWord("w2"))))
-        val vm = TrainingViewModel(repo, prefs)
+        val vm = TrainingViewModel(repo, wordListRepo, prefs)
         vm.startSession()
         vm.revealAnswer()
 
@@ -92,7 +101,7 @@ class TrainingViewModelTest {
                 promotions = emptyList(),
             ),
         )
-        val vm = TrainingViewModel(repo, prefs)
+        val vm = TrainingViewModel(repo, wordListRepo, prefs)
         vm.startSession()
 
         vm.completeSession()
@@ -104,7 +113,7 @@ class TrainingViewModelTest {
     @Test
     fun `resetSession returns to idle state`() = runTest {
         repo.startResult = Result.success(aSession(words = listOf(aTrainingWord("w1"))))
-        val vm = TrainingViewModel(repo, prefs)
+        val vm = TrainingViewModel(repo, wordListRepo, prefs)
         vm.startSession()
 
         vm.resetSession()
@@ -124,10 +133,17 @@ class TrainingViewModelTest {
         var summaryResult: Result<TrainingSessionSummary> = Result.failure(RuntimeException("not stubbed"))
         var lastMode: String? = null
         var lastSize: Int? = null
+        var lastWordListIds: List<String> = emptyList()
 
-        override suspend fun startSession(baseUrl: String, mode: String, size: Int): Result<TrainingSession> {
+        override suspend fun startSession(
+            baseUrl: String,
+            mode: String,
+            size: Int,
+            wordListIds: List<String>,
+        ): Result<TrainingSession> {
             lastMode = mode
             lastSize = size
+            lastWordListIds = wordListIds
             return startResult
         }
 
@@ -139,6 +155,34 @@ class TrainingViewModelTest {
 
         override suspend fun completeSession(baseUrl: String, sessionId: String): Result<TrainingSessionSummary> =
             summaryResult
+    }
+
+    private class FakeWordListRepository : WordListRepository {
+        override suspend fun getWordLists(
+            baseUrl: String,
+            page: Int,
+            size: Int,
+        ): Result<PagedResult<WordListSummary>> = Result.success(
+            PagedResult(items = emptyList(), total = 0, hasMore = false),
+        )
+
+        override suspend fun getWordList(baseUrl: String, id: String): Result<WordListDetail> =
+            Result.failure(RuntimeException("not stubbed"))
+
+        override suspend fun createWordList(baseUrl: String, draft: WordListDraft): Result<WordListSummary> =
+            Result.failure(RuntimeException("not stubbed"))
+
+        override suspend fun deleteWordList(baseUrl: String, id: String): Result<Unit> =
+            Result.failure(RuntimeException("not stubbed"))
+
+        override suspend fun addWord(baseUrl: String, listId: String, wordId: String): Result<Unit> =
+            Result.failure(RuntimeException("not stubbed"))
+
+        override suspend fun removeWord(baseUrl: String, listId: String, wordId: String): Result<Unit> =
+            Result.failure(RuntimeException("not stubbed"))
+
+        override suspend fun suggestWords(baseUrl: String, listId: String): Result<List<WordListSuggestion>> =
+            Result.failure(RuntimeException("not stubbed"))
     }
 
     private companion object {

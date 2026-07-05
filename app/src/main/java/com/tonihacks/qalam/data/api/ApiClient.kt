@@ -28,6 +28,11 @@ import com.tonihacks.qalam.data.api.dto.WordAutocompleteDto
 import com.tonihacks.qalam.data.api.dto.WordDraftDto
 import com.tonihacks.qalam.data.api.dto.WordDto
 import com.tonihacks.qalam.data.api.dto.WordEnrichmentSuggestionDto
+import com.tonihacks.qalam.data.api.dto.AddWordToListRequestDto
+import com.tonihacks.qalam.data.api.dto.CreateWordListRequestDto
+import com.tonihacks.qalam.data.api.dto.WordListDetailResponseDto
+import com.tonihacks.qalam.data.api.dto.WordListResponseDto
+import com.tonihacks.qalam.data.api.dto.WordListSuggestionsResponseDto
 import com.tonihacks.qalam.data.api.dto.WordMorphologyDto
 import com.tonihacks.qalam.data.api.dto.WordPluralDto
 import com.tonihacks.qalam.data.api.dto.WordRelationDto
@@ -245,6 +250,53 @@ class ApiClient @Inject constructor(
     suspend fun enrichWord(baseUrl: String, wordId: String): Result<WordEnrichmentSuggestionDto> = runCatching {
         httpClient.post("$baseUrl/api/v1/words/$wordId/enrich").body()
     }
+
+    // -------------- WORD LISTS -----------------
+    suspend fun getWordLists(
+        baseUrl: String,
+        page: Int = 1,
+        size: Int = 100,
+    ): Result<PagedResponseDto<WordListResponseDto>> = runCatching {
+        httpClient.get("$baseUrl/api/v1/word-lists") {
+            parameter("page", page)
+            parameter("size", size)
+        }.body()
+    }
+
+    suspend fun getWordList(baseUrl: String, id: String): Result<WordListDetailResponseDto> = runCatching {
+        httpClient.get("$baseUrl/api/v1/word-lists/$id").body()
+    }
+
+    suspend fun createWordList(baseUrl: String, request: CreateWordListRequestDto): Result<WordListResponseDto> =
+        runCatching {
+            httpClient.post("$baseUrl/api/v1/word-lists") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.body()
+        }
+
+    suspend fun deleteWordList(baseUrl: String, id: String): Result<Unit> = runCatching {
+        httpClient.delete("$baseUrl/api/v1/word-lists/$id")
+        Unit
+    }
+
+    suspend fun addWordToList(baseUrl: String, listId: String, wordId: String): Result<Unit> = runCatching {
+        httpClient.post("$baseUrl/api/v1/word-lists/$listId/words") {
+            contentType(ContentType.Application.Json)
+            setBody(AddWordToListRequestDto(wordId))
+        }
+        Unit
+    }
+
+    suspend fun removeWordFromList(baseUrl: String, listId: String, wordId: String): Result<Unit> = runCatching {
+        httpClient.delete("$baseUrl/api/v1/word-lists/$listId/words/$wordId")
+        Unit
+    }
+
+    suspend fun suggestWordsForList(baseUrl: String, listId: String): Result<WordListSuggestionsResponseDto> =
+        runCatching {
+            httpClient.post("$baseUrl/api/v1/word-lists/$listId/suggest").body()
+        }
 
     // -------------- ROOTS -----------------
     suspend fun getRoots(
