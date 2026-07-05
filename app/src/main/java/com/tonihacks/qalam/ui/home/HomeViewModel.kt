@@ -22,6 +22,7 @@ import javax.inject.Inject
 
 data class HomeUiState(
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val error: String? = null,
     val totalWords: Int = 0,
     val totalRoots: Int = 0,
@@ -68,6 +69,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun refresh() {
+        _uiState.update { it.copy(isRefreshing = true) }
+        load()
+    }
+
     fun load() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -83,7 +89,7 @@ class HomeViewModel @Inject constructor(
             val data = overview.getOrNull()
             if (data == null) {
                 _uiState.update {
-                    it.copy(isLoading = false, error = overview.exceptionOrNull()?.message ?: "Failed to load overview")
+                    it.copy(isLoading = false, isRefreshing = false, error = overview.exceptionOrNull()?.message ?: "Failed to load overview")
                 }
                 return@launch
             }
@@ -91,6 +97,7 @@ class HomeViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     isLoading = false,
+                    isRefreshing = false,
                     error = null,
                     totalWords = data.totalWords,
                     totalRoots = data.totalRoots,

@@ -34,8 +34,10 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.outlined.AccountTree
 import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -77,6 +79,7 @@ import com.tonihacks.qalam.ui.words.label
 import com.tonihacks.qalam.ui.words.toQalamColor
 import java.time.LocalTime
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToSettings: () -> Unit = {},
@@ -101,38 +104,44 @@ fun HomeScreen(
     val hasData = uiState.totalWords > 0 || uiState.totalRoots > 0 || uiState.totalTexts > 0
 
     Box(Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(top = 14.dp, bottom = 110.dp),
+        PullToRefreshBox(
+            isRefreshing = uiState.isRefreshing,
+            onRefresh = viewModel::refresh,
+            modifier = Modifier.fillMaxSize(),
         ) {
-            HomeHeader(
-                connectionState = connectionState,
-                baseUrl = baseUrl,
-                onNavigateToSettings = onNavigateToSettings,
-            )
-            Spacer(Modifier.height(22.dp))
-            DueForReviewCard(dueCount = uiState.dueCount, onClick = onStartTraining)
-            Spacer(Modifier.height(22.dp))
-            MasteryOverviewCard(totalWords = uiState.totalWords, masteryCounts = uiState.masteryCounts)
-            Spacer(Modifier.height(14.dp))
-            QuickStatsRow(
-                totalWords = uiState.totalWords,
-                totalRoots = uiState.totalRoots,
-                totalTexts = uiState.totalTexts,
-                onWords = onNavigateToWords,
-                onRoots = onNavigateToRoots,
-                onTexts = onNavigateToTexts,
-            )
-            if (uiState.recentWords.isNotEmpty()) {
-                Spacer(Modifier.height(26.dp))
-                JumpBackInSection(
-                    words = uiState.recentWords,
-                    onAllWords = onNavigateToWords,
-                    onWordClick = onNavigateToWord,
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+                    .padding(top = 14.dp, bottom = 110.dp),
+            ) {
+                HomeHeader(
+                    connectionState = connectionState,
+                    baseUrl = baseUrl,
+                    onNavigateToSettings = onNavigateToSettings,
                 )
+                Spacer(Modifier.height(22.dp))
+                DueForReviewCard(dueCount = uiState.dueCount, onClick = onStartTraining)
+                Spacer(Modifier.height(22.dp))
+                MasteryOverviewCard(totalWords = uiState.totalWords, masteryCounts = uiState.masteryCounts)
+                Spacer(Modifier.height(14.dp))
+                QuickStatsRow(
+                    totalWords = uiState.totalWords,
+                    totalRoots = uiState.totalRoots,
+                    totalTexts = uiState.totalTexts,
+                    onWords = onNavigateToWords,
+                    onRoots = onNavigateToRoots,
+                    onTexts = onNavigateToTexts,
+                )
+                if (uiState.recentWords.isNotEmpty()) {
+                    Spacer(Modifier.height(26.dp))
+                    JumpBackInSection(
+                        words = uiState.recentWords,
+                        onAllWords = onNavigateToWords,
+                        onWordClick = onNavigateToWord,
+                    )
+                }
             }
         }
 

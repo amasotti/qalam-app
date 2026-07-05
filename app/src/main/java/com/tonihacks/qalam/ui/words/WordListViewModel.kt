@@ -21,6 +21,7 @@ data class WordListUiState(
     val query: String = "",
     val activeFilter: MasteryLevel? = null,
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val error: String? = null,
     val hasMore: Boolean = true,
     val currentPage: Int = 1,
@@ -56,6 +57,11 @@ class WordListViewModel @Inject constructor(
     fun loadMore() {
         val s = _uiState.value
         if (s.isLoading || !s.hasMore) return
+        load()
+    }
+
+    fun refresh() {
+        _uiState.update { it.copy(items = emptyList(), currentPage = 1, hasMore = true, isRefreshing = true) }
         load()
     }
 
@@ -101,13 +107,14 @@ class WordListViewModel @Inject constructor(
                         cur.copy(
                             items = cur.items + paged.items,
                             isLoading = false,
+                            isRefreshing = false,
                             hasMore = paged.hasMore,
                             currentPage = cur.currentPage + 1,
                         )
                     }
                 },
                 onFailure = { err ->
-                    _uiState.update { it.copy(isLoading = false, error = err.message) }
+                    _uiState.update { it.copy(isLoading = false, isRefreshing = false, error = err.message) }
                 },
             )
         }
