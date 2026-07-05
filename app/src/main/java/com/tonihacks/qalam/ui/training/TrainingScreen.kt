@@ -63,10 +63,18 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonihacks.qalam.domain.model.Example
 import com.tonihacks.qalam.domain.model.FlashcardSide
+import com.tonihacks.qalam.domain.model.MasteryLevel
+import com.tonihacks.qalam.domain.model.MasteryPromotion
+import com.tonihacks.qalam.domain.model.TrainingSessionSummary
 import com.tonihacks.qalam.domain.model.TrainingWord
 import com.tonihacks.qalam.domain.model.TrainingWordRelation
+import com.tonihacks.qalam.ui.theme.MasteryLearning
+import com.tonihacks.qalam.ui.theme.MasteryMastered
+import com.tonihacks.qalam.ui.theme.MasteryReviewing
+import com.tonihacks.qalam.ui.theme.MasteryUnseen
 import com.tonihacks.qalam.ui.theme.NotoNaskh
 import com.tonihacks.qalam.ui.theme.QalamBg
+import com.tonihacks.qalam.ui.theme.QalamGoldC
 import com.tonihacks.qalam.ui.theme.QalamInk
 import com.tonihacks.qalam.ui.theme.QalamInk2
 import com.tonihacks.qalam.ui.theme.QalamInk3
@@ -78,6 +86,7 @@ import com.tonihacks.qalam.ui.theme.QalamSurface
 import com.tonihacks.qalam.ui.theme.QalamSurface2
 import com.tonihacks.qalam.ui.theme.QalamSurface3
 import com.tonihacks.qalam.ui.theme.QalamTerra
+import com.tonihacks.qalam.ui.theme.QalamTerraC
 import com.tonihacks.qalam.ui.theme.Typography
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -781,20 +790,181 @@ private fun TrainingComplete(
     onTrainAgain: () -> Unit,
 ) {
     val summary = state.summary
-    val message = if (summary == null) {
-        "Saving your session..."
-    } else {
-        "${summary.correct} knew it · ${summary.incorrect} to review · ${summary.accuracy.roundToInt()}% accuracy"
+
+    if (summary == null) {
+        TrainingMessage(
+            title = "Session complete",
+            message = "Saving your session...",
+            actionLabel = "Done",
+            onAction = onClose,
+            showProgress = true,
+        )
+        return
     }
 
-    TrainingMessage(
-        title = "Session complete",
-        message = message,
-        actionLabel = "Done",
-        onAction = onClose,
-        secondaryActionLabel = "Train again",
-        onSecondaryAction = onTrainAgain,
-        showProgress = summary == null,
+    val wordById = state.session?.words?.associateBy { it.id } ?: emptyMap()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Spacer(Modifier.height(12.dp))
+
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .background(QalamPrimaryC, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = QalamPrimary, modifier = Modifier.size(36.dp))
+        }
+
+        Spacer(Modifier.height(18.dp))
+        Text("Session complete", style = Typography.headlineMedium, color = QalamInk)
+        Spacer(Modifier.height(20.dp))
+
+        SummaryStatsRow(summary)
+
+        if (summary.promotions.isNotEmpty()) {
+            Spacer(Modifier.height(24.dp))
+            PromotionsList(summary.promotions, wordById)
+        }
+
+        Spacer(Modifier.height(32.dp))
+
+        Button(
+            onClick = onClose,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = QalamPrimary, contentColor = QalamOnPrimary),
+            contentPadding = PaddingValues(vertical = 14.dp),
+        ) {
+            Text("Done", style = Typography.labelLarge)
+        }
+        Spacer(Modifier.height(10.dp))
+        OutlinedButton(
+            onClick = onTrainAgain,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = QalamPrimary),
+        ) {
+            Text("Train again", style = Typography.labelLarge)
+        }
+    }
+}
+
+@Composable
+private fun SummaryStatsRow(summary: TrainingSessionSummary) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        StatCard(
+            label = "Correct",
+            value = summary.correct.toString(),
+            containerColor = QalamPrimaryC,
+            valueColor = QalamPrimary,
+            modifier = Modifier.weight(1f),
+        )
+        StatCard(
+            label = "To review",
+            value = summary.incorrect.toString(),
+            containerColor = QalamTerraC,
+            valueColor = QalamTerra,
+            modifier = Modifier.weight(1f),
+        )
+        StatCard(
+            label = "Accuracy",
+            value = "${summary.accuracy.roundToInt()}%",
+            containerColor = QalamGoldC,
+            valueColor = QalamInk,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun StatCard(
+    label: String,
+    value: String,
+    containerColor: androidx.compose.ui.graphics.Color,
+    valueColor: androidx.compose.ui.graphics.Color,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .background(containerColor, RoundedCornerShape(12.dp))
+            .padding(vertical = 14.dp, horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(value, style = Typography.headlineSmall, color = valueColor)
+        Text(label, style = Typography.labelSmall, color = QalamInk2)
+    }
+}
+
+@Composable
+private fun PromotionsList(
+    promotions: List<MasteryPromotion>,
+    wordById: Map<String, TrainingWord>,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            "${promotions.size} word${if (promotions.size == 1) "" else "s"} promoted",
+            style = Typography.labelLarge,
+            color = QalamInk2,
+        )
+        Spacer(Modifier.height(8.dp))
+        promotions.forEach { promotion ->
+            val arabic = wordById[promotion.wordId]?.arabicText ?: "—"
+            PromotionRow(arabic = arabic, promotion = promotion)
+            HorizontalDivider(color = QalamSurface2, modifier = Modifier.padding(vertical = 4.dp))
+        }
+    }
+}
+
+@Composable
+private fun PromotionRow(arabic: String, promotion: MasteryPromotion) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+            Text(
+                arabic,
+                style = Typography.titleMedium.copy(fontFamily = NotoNaskh, fontSize = 22.sp),
+                color = QalamInk,
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            MasteryChip(promotion.from)
+            Text("→", style = Typography.bodySmall, color = QalamInk2)
+            MasteryChip(promotion.to)
+        }
+    }
+}
+
+@Composable
+private fun MasteryChip(level: MasteryLevel) {
+    val (bg, fg) = when (level) {
+        MasteryLevel.NEW      -> MasteryUnseen to QalamInk2
+        MasteryLevel.LEARNING -> MasteryLearning to QalamInk
+        MasteryLevel.KNOWN    -> MasteryReviewing to QalamOnPrimary
+        MasteryLevel.MASTERED -> MasteryMastered to QalamOnPrimary
+    }
+    Text(
+        text = level.name.lowercase().replaceFirstChar { it.uppercase() },
+        modifier = Modifier
+            .background(bg, RoundedCornerShape(6.dp))
+            .padding(horizontal = 8.dp, vertical = 3.dp),
+        style = Typography.labelSmall,
+        color = fg,
     )
 }
 

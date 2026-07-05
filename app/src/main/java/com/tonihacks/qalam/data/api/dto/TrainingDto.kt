@@ -148,7 +148,7 @@ fun TrainingSessionSummaryDto.toDomain() = TrainingSessionSummary(
     correct = correct,
     incorrect = incorrect,
     skipped = skipped,
-    accuracy = accuracy,
+    accuracy = accuracy * 100.0, // backend sends fraction (0.0-1.0); domain uses percentage (0.0-100.0)
     promotions = promotions.map { it.toDomain() },
 )
 
