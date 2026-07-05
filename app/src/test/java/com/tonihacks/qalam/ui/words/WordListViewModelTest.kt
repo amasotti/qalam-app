@@ -149,6 +149,13 @@ class WordListViewModelTest {
         override suspend fun createWord(baseUrl: String, draft: WordDraft): Result<Word> =
             error("not stubbed")
 
+        override suspend fun lookupInDictionary(
+            baseUrl: String,
+            query: String
+        ): Result<List<DictionaryLookupItem>> {
+            error("not stubbed")
+        }
+
         override suspend fun saveExample(
             baseUrl: String,
             wordId: String,
