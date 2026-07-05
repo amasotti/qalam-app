@@ -1,6 +1,9 @@
 package com.tonihacks.qalam.data.api
 
 import com.tonihacks.qalam.data.api.dto.AiExamplesResponseDto
+import com.tonihacks.qalam.data.api.dto.CreateDictionaryLinkRequestDto
+import com.tonihacks.qalam.data.api.dto.CreateWordPluralRequestDto
+import com.tonihacks.qalam.data.api.dto.CreateWordRelationRequestDto
 import com.tonihacks.qalam.data.api.dto.DictionaryLookupResponseDto
 import com.tonihacks.qalam.data.api.dto.AnalyticsOverviewDto
 import com.tonihacks.qalam.data.api.dto.AnnotationDto
@@ -19,14 +22,23 @@ import com.tonihacks.qalam.data.api.dto.StartTrainingSessionRequestDto
 import com.tonihacks.qalam.data.api.dto.TextDto
 import com.tonihacks.qalam.data.api.dto.TrainingSessionDto
 import com.tonihacks.qalam.data.api.dto.TrainingSessionSummaryDto
+import com.tonihacks.qalam.data.api.dto.UpdateWordRequestDto
+import com.tonihacks.qalam.data.api.dto.UpsertWordMorphologyRequestDto
+import com.tonihacks.qalam.data.api.dto.WordAutocompleteDto
 import com.tonihacks.qalam.data.api.dto.WordDraftDto
 import com.tonihacks.qalam.data.api.dto.WordDto
+import com.tonihacks.qalam.data.api.dto.WordEnrichmentSuggestionDto
+import com.tonihacks.qalam.data.api.dto.WordMorphologyDto
+import com.tonihacks.qalam.data.api.dto.WordPluralDto
+import com.tonihacks.qalam.data.api.dto.WordRelationDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -70,6 +82,33 @@ class ApiClient @Inject constructor(
         httpClient.get("$baseUrl/api/v1/words/$id").body()
     }
 
+    suspend fun updateWord(
+        baseUrl: String,
+        id: String,
+        request: UpdateWordRequestDto,
+    ): Result<WordDto> = runCatching {
+        httpClient.put("$baseUrl/api/v1/words/$id") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun deleteWord(baseUrl: String, id: String): Result<Unit> = runCatching {
+        httpClient.delete("$baseUrl/api/v1/words/$id")
+        Unit
+    }
+
+    suspend fun autocompleteWords(
+        baseUrl: String,
+        query: String,
+        limit: Int = 10,
+    ): Result<List<WordAutocompleteDto>> = runCatching {
+        httpClient.get("$baseUrl/api/v1/words/autocomplete") {
+            parameter("q", query)
+            parameter("limit", limit)
+        }.body()
+    }
+
     suspend fun getExamples(baseUrl: String, wordId: String): Result<List<ExampleDto>> = runCatching {
         httpClient.get("$baseUrl/api/v1/words/$wordId/examples").body()
     }
@@ -85,12 +124,33 @@ class ApiClient @Inject constructor(
         }.body()
     }
 
+    suspend fun deleteExample(baseUrl: String, wordId: String, exampleId: String): Result<Unit> = runCatching {
+        httpClient.delete("$baseUrl/api/v1/words/$wordId/examples/$exampleId")
+        Unit
+    }
+
     suspend fun generateExamples(baseUrl: String, wordId: String): Result<AiExamplesResponseDto> = runCatching {
         httpClient.post("$baseUrl/api/v1/words/$wordId/examples/generate").body()
     }
 
     suspend fun getDictionaryLinks(baseUrl: String, wordId: String): Result<List<DictionaryLinkDto>> = runCatching {
         httpClient.get("$baseUrl/api/v1/words/$wordId/dictionary-links").body()
+    }
+
+    suspend fun addDictionaryLink(
+        baseUrl: String,
+        wordId: String,
+        request: CreateDictionaryLinkRequestDto,
+    ): Result<DictionaryLinkDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/words/$wordId/dictionary-links") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun deleteDictionaryLink(baseUrl: String, wordId: String, linkId: String): Result<Unit> = runCatching {
+        httpClient.delete("$baseUrl/api/v1/words/$wordId/dictionary-links/$linkId")
+        Unit
     }
 
     suspend fun createWord(baseUrl: String, draft: WordDraftDto): Result<WordDto> = runCatching {
@@ -120,6 +180,70 @@ class ApiClient @Inject constructor(
         } catch (e: ClientRequestException) {
             if (e.response.status == HttpStatusCode.NotFound) null else throw e
         }
+    }
+
+    suspend fun getWordMorphology(baseUrl: String, wordId: String): Result<WordMorphologyDto> = runCatching {
+        httpClient.get("$baseUrl/api/v1/words/$wordId/morphology").body()
+    }
+
+    suspend fun upsertWordMorphology(
+        baseUrl: String,
+        wordId: String,
+        request: UpsertWordMorphologyRequestDto,
+    ): Result<WordMorphologyDto> = runCatching {
+        httpClient.put("$baseUrl/api/v1/words/$wordId/morphology") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun getWordPlurals(baseUrl: String, wordId: String): Result<List<WordPluralDto>> = runCatching {
+        httpClient.get("$baseUrl/api/v1/words/$wordId/plurals").body()
+    }
+
+    suspend fun addWordPlural(
+        baseUrl: String,
+        wordId: String,
+        request: CreateWordPluralRequestDto,
+    ): Result<WordPluralDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/words/$wordId/plurals") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun deleteWordPlural(baseUrl: String, wordId: String, pluralId: String): Result<Unit> = runCatching {
+        httpClient.delete("$baseUrl/api/v1/words/$wordId/plurals/$pluralId")
+        Unit
+    }
+
+    suspend fun getWordRelations(baseUrl: String, wordId: String): Result<List<WordRelationDto>> = runCatching {
+        httpClient.get("$baseUrl/api/v1/words/$wordId/relations").body()
+    }
+
+    suspend fun addWordRelation(
+        baseUrl: String,
+        wordId: String,
+        request: CreateWordRelationRequestDto,
+    ): Result<WordRelationDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/words/$wordId/relations") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun deleteWordRelation(
+        baseUrl: String,
+        wordId: String,
+        relatedWordId: String,
+        relationType: String,
+    ): Result<Unit> = runCatching {
+        httpClient.delete("$baseUrl/api/v1/words/$wordId/relations/$relatedWordId/$relationType")
+        Unit
+    }
+
+    suspend fun enrichWord(baseUrl: String, wordId: String): Result<WordEnrichmentSuggestionDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/words/$wordId/enrich").body()
     }
 
     // -------------- ROOTS -----------------
