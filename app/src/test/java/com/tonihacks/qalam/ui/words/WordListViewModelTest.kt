@@ -130,12 +130,21 @@ class WordListViewModelTest {
         override suspend fun getWord(baseUrl: String, id: String): Result<Word> =
             error("not stubbed")
 
+        override suspend fun updateWord(baseUrl: String, id: String, update: WordUpdate): Result<Word> =
+            error("not stubbed")
+
+        override suspend fun deleteWord(baseUrl: String, id: String): Result<Unit> =
+            error("not stubbed")
+
         override suspend fun getWordByArabic(
             baseUrl: String,
             arabicText: String
         ): Result<Word?> {
-            TODO("Not yet implemented")
+            error("not stubbed")
         }
+
+        override suspend fun autocompleteWords(baseUrl: String, query: String): Result<List<WordAutocomplete>> =
+            error("not stubbed")
 
         override suspend fun getExamples(baseUrl: String, wordId: String): Result<List<Example>> =
             error("not stubbed")
@@ -144,6 +153,20 @@ class WordListViewModelTest {
             baseUrl: String,
             wordId: String,
         ): Result<List<DictionaryLink>> =
+            error("not stubbed")
+
+        override suspend fun addDictionaryLink(
+            baseUrl: String,
+            wordId: String,
+            draft: DictionaryLinkDraft
+        ): Result<DictionaryLink> =
+            error("not stubbed")
+
+        override suspend fun deleteDictionaryLink(
+            baseUrl: String,
+            wordId: String,
+            linkId: String
+        ): Result<Unit> =
             error("not stubbed")
 
         override suspend fun createWord(baseUrl: String, draft: WordDraft): Result<Word> =
@@ -161,14 +184,17 @@ class WordListViewModelTest {
             wordId: String,
             example: AiExample
         ): Result<Example> {
-            TODO("Not yet implemented")
+            error("not stubbed")
         }
+
+        override suspend fun deleteExample(baseUrl: String, wordId: String, exampleId: String): Result<Unit> =
+            error("not stubbed")
 
         override suspend fun generateExamples(
             baseUrl: String,
             wordId: String
         ): Result<List<AiExample>> {
-            TODO("Not yet implemented")
+            error("not stubbed")
         }
 
         override suspend fun generateInsight(
@@ -176,7 +202,52 @@ class WordListViewModelTest {
             entityType: String,
             entityId: String
         ): Result<String> {
-            TODO("Not yet implemented")
+            error("not stubbed")
         }
+
+        override suspend fun getMorphology(baseUrl: String, wordId: String): Result<WordMorphology> =
+            error("not stubbed")
+
+        override suspend fun upsertMorphology(
+            baseUrl: String,
+            wordId: String,
+            gender: String?,
+            verbPattern: String?
+        ): Result<WordMorphology> =
+            error("not stubbed")
+
+        override suspend fun getPlurals(baseUrl: String, wordId: String): Result<List<WordPlural>> =
+            error("not stubbed")
+
+        override suspend fun addPlural(
+            baseUrl: String,
+            wordId: String,
+            draft: WordPluralDraft
+        ): Result<WordPlural> =
+            error("not stubbed")
+
+        override suspend fun deletePlural(baseUrl: String, wordId: String, pluralId: String): Result<Unit> =
+            error("not stubbed")
+
+        override suspend fun getRelations(baseUrl: String, wordId: String): Result<List<WordRelation>> =
+            error("not stubbed")
+
+        override suspend fun addRelation(
+            baseUrl: String,
+            wordId: String,
+            draft: WordRelationDraft
+        ): Result<WordRelation> =
+            error("not stubbed")
+
+        override suspend fun deleteRelation(
+            baseUrl: String,
+            wordId: String,
+            relatedWordId: String,
+            relationType: String
+        ): Result<Unit> =
+            error("not stubbed")
+
+        override suspend fun enrichWord(baseUrl: String, wordId: String): Result<WordEnrichmentSuggestion> =
+            error("not stubbed")
     }
 }
