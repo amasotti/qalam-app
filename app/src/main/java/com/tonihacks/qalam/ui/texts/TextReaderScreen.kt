@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tonihacks.qalam.domain.model.DictionaryLookupItem
 import com.tonihacks.qalam.domain.model.TextPassage
 import com.tonihacks.qalam.domain.model.TextSentence
 import com.tonihacks.qalam.domain.model.TextToken
@@ -94,10 +95,15 @@ fun TextReaderScreen(
             sentences = s.sentences,
             isLinkingWord = s.isLinkingWord,
             linkWordError = s.linkWordError,
+            lookupItems = s.lookupItems,
+            isLookingUp = s.isLookingUp,
+            lookupError = s.lookupError,
             onBack = onBack,
             onNavigateToWord = onNavigateToWord,
             onAddToVocabulary = viewModel::addTokenToVocabulary,
             onClearLinkError = viewModel::clearLinkError,
+            onLookupWord = viewModel::lookupWord,
+            onClearLookup = viewModel::clearLookup,
         )
     }
 }
@@ -109,10 +115,15 @@ private fun TextReaderContent(
     sentences: List<TextSentence>,
     isLinkingWord: Boolean,
     linkWordError: String?,
+    lookupItems: List<DictionaryLookupItem>,
+    isLookingUp: Boolean,
+    lookupError: String?,
     onBack: () -> Unit,
     onNavigateToWord: (String) -> Unit,
     onAddToVocabulary: (TextToken, WordDraft, () -> Unit) -> Unit,
     onClearLinkError: () -> Unit,
+    onLookupWord: (String) -> Unit,
+    onClearLookup: () -> Unit,
 ) {
     var mode by remember { mutableStateOf(ReaderMode.INTERLINEAR) }
     var selectedToken by remember { mutableStateOf<TextToken?>(null) }
@@ -263,9 +274,14 @@ private fun TextReaderContent(
         AddWordSheet(
             isSaving = isLinkingWord,
             errorMessage = linkWordError,
+            lookupItems = lookupItems,
+            isLookingUp = isLookingUp,
+            lookupError = lookupError,
+            onLookup = onLookupWord,
             onDismiss = {
                 showAddWordFor = null
                 onClearLinkError()
+                onClearLookup()
             },
             onSave = { draft ->
                 onAddToVocabulary(token, draft) { showAddWordFor = null }

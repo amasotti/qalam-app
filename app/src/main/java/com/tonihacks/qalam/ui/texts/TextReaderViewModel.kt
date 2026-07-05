@@ -3,6 +3,7 @@ package com.tonihacks.qalam.ui.texts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tonihacks.qalam.data.local.PreferencesRepository
+import com.tonihacks.qalam.domain.model.DictionaryLookupItem
 import com.tonihacks.qalam.domain.model.TextAnnotation
 import com.tonihacks.qalam.domain.model.TextPassage
 import com.tonihacks.qalam.domain.model.TextSentence
@@ -28,6 +29,9 @@ sealed interface TextReaderUiState {
         val annotations: List<TextAnnotation> = emptyList(),
         val isLinkingWord: Boolean = false,
         val linkWordError: String? = null,
+        val lookupItems: List<DictionaryLookupItem> = emptyList(),
+        val isLookingUp: Boolean = false,
+        val lookupError: String? = null,
     ) : TextReaderUiState
     data class Error(val message: String) : TextReaderUiState
 }
@@ -161,6 +165,37 @@ class TextReaderViewModel @Inject constructor(
                 },
                 onFailure = { err -> setLinkError(err.message ?: "Failed to add word") },
             )
+        }
+    }
+
+    fun lookupWord(query: String) {
+        viewModelScope.launch {
+            _uiState.update {
+                (it as? TextReaderUiState.Success)?.copy(
+                    isLookingUp = true, lookupError = null, lookupItems = emptyList(),
+                ) ?: it
+            }
+            val baseUrl = prefs.baseUrl.first()
+            wordRepository.lookupInDictionary(baseUrl, query).fold(
+                onSuccess = { items ->
+                    _uiState.update {
+                        (it as? TextReaderUiState.Success)?.copy(isLookingUp = false, lookupItems = items) ?: it
+                    }
+                },
+                onFailure = { err ->
+                    _uiState.update {
+                        (it as? TextReaderUiState.Success)?.copy(
+                            isLookingUp = false, lookupError = err.message ?: "Lookup failed",
+                        ) ?: it
+                    }
+                },
+            )
+        }
+    }
+
+    fun clearLookup() {
+        _uiState.update {
+            (it as? TextReaderUiState.Success)?.copy(lookupItems = emptyList(), lookupError = null) ?: it
         }
     }
 

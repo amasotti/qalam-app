@@ -50,3 +50,12 @@ data class PagedResult<T>(
     val hasMore: Boolean,
 )
 
+data class DictionaryLookupItem(
+    val externalId: String,
+    val arabicText: String,
+    val transliteration: String?,
+    val translation: String?,
+    val pluralArabic: String?,
+    val hasExactWordMatch: Boolean,
+)
+

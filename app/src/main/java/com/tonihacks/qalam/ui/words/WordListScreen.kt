@@ -167,7 +167,14 @@ fun WordListScreen(
         AddWordSheet(
             isSaving = uiState.isCreating,
             errorMessage = uiState.createWordError,
-            onDismiss = { showAddSheet = false },
+            lookupItems = uiState.lookupItems,
+            isLookingUp = uiState.isLookingUp,
+            lookupError = uiState.lookupError,
+            onLookup = viewModel::lookupWord,
+            onDismiss = {
+                showAddSheet = false
+                viewModel.clearLookup()
+            },
             onSave = { draft ->
                 viewModel.createWord(draft) { showAddSheet = false }
             },

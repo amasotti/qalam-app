@@ -3,6 +3,7 @@ package com.tonihacks.qalam.ui.words
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tonihacks.qalam.data.local.PreferencesRepository
+import com.tonihacks.qalam.domain.model.DictionaryLookupItem
 import com.tonihacks.qalam.domain.model.MasteryLevel
 import com.tonihacks.qalam.domain.model.Word
 import com.tonihacks.qalam.domain.model.WordDraft
@@ -26,7 +27,10 @@ data class WordListUiState(
     val hasMore: Boolean = true,
     val currentPage: Int = 1,
     val isCreating: Boolean = false,
-    val createWordError: String? = null
+    val createWordError: String? = null,
+    val lookupItems: List<DictionaryLookupItem> = emptyList(),
+    val isLookingUp: Boolean = false,
+    val lookupError: String? = null,
 )
 
 @HiltViewModel
@@ -63,6 +67,25 @@ class WordListViewModel @Inject constructor(
     fun refresh() {
         _uiState.update { it.copy(items = emptyList(), currentPage = 1, hasMore = true, isRefreshing = true) }
         load()
+    }
+
+    fun lookupWord(query: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLookingUp = true, lookupError = null, lookupItems = emptyList()) }
+            val baseUrl = prefs.baseUrl.first()
+            wordRepository.lookupInDictionary(baseUrl, query).fold(
+                onSuccess = { items ->
+                    _uiState.update { it.copy(isLookingUp = false, lookupItems = items) }
+                },
+                onFailure = { err ->
+                    _uiState.update { it.copy(isLookingUp = false, lookupError = err.message ?: "Lookup failed") }
+                },
+            )
+        }
+    }
+
+    fun clearLookup() {
+        _uiState.update { it.copy(lookupItems = emptyList(), lookupError = null) }
     }
 
     fun createWord(draft: WordDraft, onCreated: () -> Unit) {
