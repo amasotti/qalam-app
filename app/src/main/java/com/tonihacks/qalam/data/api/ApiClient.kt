@@ -101,7 +101,6 @@ class ApiClient @Inject constructor(
 
     suspend fun deleteWord(baseUrl: String, id: String): Result<Unit> = runCatching {
         httpClient.delete("$baseUrl/api/v1/words/$id")
-        Unit
     }
 
     suspend fun autocompleteWords(
@@ -132,7 +131,6 @@ class ApiClient @Inject constructor(
 
     suspend fun deleteExample(baseUrl: String, wordId: String, exampleId: String): Result<Unit> = runCatching {
         httpClient.delete("$baseUrl/api/v1/words/$wordId/examples/$exampleId")
-        Unit
     }
 
     suspend fun generateExamples(baseUrl: String, wordId: String): Result<AiExamplesResponseDto> = runCatching {
@@ -158,7 +156,6 @@ class ApiClient @Inject constructor(
 
     suspend fun deleteDictionaryLink(baseUrl: String, wordId: String, linkId: String): Result<Unit> = runCatching {
         httpClient.delete("$baseUrl/api/v1/words/$wordId/dictionary-links/$linkId")
-        Unit
     }
 
     suspend fun createWord(baseUrl: String, draft: WordDraftDto): Result<WordDto> = runCatching {
@@ -222,7 +219,6 @@ class ApiClient @Inject constructor(
 
     suspend fun deleteWordPlural(baseUrl: String, wordId: String, pluralId: String): Result<Unit> = runCatching {
         httpClient.delete("$baseUrl/api/v1/words/$wordId/plurals/$pluralId")
-        Unit
     }
 
     suspend fun getWordRelations(baseUrl: String, wordId: String): Result<List<WordRelationDto>> = runCatching {
@@ -247,7 +243,6 @@ class ApiClient @Inject constructor(
         relationType: String,
     ): Result<Unit> = runCatching {
         httpClient.delete("$baseUrl/api/v1/words/$wordId/relations/$relatedWordId/$relationType")
-        Unit
     }
 
     suspend fun enrichWord(baseUrl: String, wordId: String): Result<WordEnrichmentSuggestionDto> = runCatching {
@@ -282,7 +277,6 @@ class ApiClient @Inject constructor(
 
     suspend fun deleteWordList(baseUrl: String, id: String): Result<Unit> = runCatching {
         httpClient.delete("$baseUrl/api/v1/word-lists/$id")
-        Unit
     }
 
     suspend fun addWordToList(baseUrl: String, listId: String, wordId: String): Result<Unit> = runCatching {
@@ -290,12 +284,10 @@ class ApiClient @Inject constructor(
             contentType(ContentType.Application.Json)
             setBody(AddWordToListRequestDto(wordId))
         }
-        Unit
     }
 
     suspend fun removeWordFromList(baseUrl: String, listId: String, wordId: String): Result<Unit> = runCatching {
         httpClient.delete("$baseUrl/api/v1/word-lists/$listId/words/$wordId")
-        Unit
     }
 
     suspend fun suggestWordsForList(baseUrl: String, listId: String): Result<WordListSuggestionsResponseDto> =
