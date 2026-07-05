@@ -1,6 +1,7 @@
 package com.tonihacks.qalam.data.api
 
 import com.tonihacks.qalam.data.api.dto.AiExamplesResponseDto
+import com.tonihacks.qalam.data.api.dto.DictionaryLookupResponseDto
 import com.tonihacks.qalam.data.api.dto.AnalyticsOverviewDto
 import com.tonihacks.qalam.data.api.dto.AnnotationDto
 import com.tonihacks.qalam.data.api.dto.CreateAnnotationRequestDto
@@ -96,6 +97,17 @@ class ApiClient @Inject constructor(
         httpClient.post("$baseUrl/api/v1/words") {
             contentType(ContentType.Application.Json)
             setBody(draft)
+        }.body()
+    }
+
+    suspend fun lookupInDictionary(
+        baseUrl: String,
+        query: String,
+        source: String = "ASD",
+    ): Result<DictionaryLookupResponseDto> = runCatching {
+        httpClient.get("$baseUrl/api/v1/words/dictionary-lookups") {
+            parameter("source", source)
+            parameter("query", query)
         }.body()
     }
 

@@ -9,6 +9,7 @@ import com.tonihacks.qalam.data.api.dto.toDto
 import com.tonihacks.qalam.domain.model.AiExample
 import com.tonihacks.qalam.domain.model.AiUnavailableException
 import com.tonihacks.qalam.domain.model.DictionaryLink
+import com.tonihacks.qalam.domain.model.DictionaryLookupItem
 import com.tonihacks.qalam.domain.model.Example
 import com.tonihacks.qalam.domain.model.PagedResult
 import com.tonihacks.qalam.domain.model.Word
@@ -58,6 +59,11 @@ class WordRepositoryImpl @Inject constructor(
 
     override suspend fun createWord(baseUrl: String, draft: WordDraft): Result<Word> =
         apiClient.createWord(baseUrl, draft.toDto()).map { it.toDomain() }
+
+    override suspend fun lookupInDictionary(baseUrl: String, query: String): Result<List<DictionaryLookupItem>> =
+        apiClient.lookupInDictionary(baseUrl, query = query).map { dto ->
+            dto.items.map { it.toDomain() }
+        }
 
     override suspend fun saveExample(baseUrl: String, wordId: String, example: AiExample): Result<Example> =
         apiClient.saveExample(

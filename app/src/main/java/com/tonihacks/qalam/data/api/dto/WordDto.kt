@@ -4,6 +4,38 @@ import com.tonihacks.qalam.domain.model.*
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class DictionaryLookupPluralDto(
+    val arabicText: String,
+    val transliteration: String? = null,
+)
+
+@Serializable
+data class DictionaryLookupItemDto(
+    val externalId: String,
+    val arabicText: String,
+    val transliteration: String? = null,
+    val translation: String? = null,
+    val plural: DictionaryLookupPluralDto? = null,
+    val hasExactWordMatch: Boolean,
+)
+
+@Serializable
+data class DictionaryLookupResponseDto(
+    val source: String,
+    val query: String,
+    val items: List<DictionaryLookupItemDto>,
+)
+
+fun DictionaryLookupItemDto.toDomain() = DictionaryLookupItem(
+    externalId = externalId,
+    arabicText = arabicText,
+    transliteration = transliteration,
+    translation = translation,
+    pluralArabic = plural?.arabicText,
+    hasExactWordMatch = hasExactWordMatch,
+)
+
+@Serializable
 data class WordDto(
     val id: String,
     val arabicText: String,
