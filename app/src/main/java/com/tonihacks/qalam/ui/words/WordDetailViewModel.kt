@@ -55,6 +55,7 @@ sealed interface WordDetailUiState {
         val enrichmentUnavailable: Boolean = false,
         val isSavingEnrichment: Boolean = false,
         val linkingSuggestedRelationIndexes: Set<Int> = emptySet(),
+        val linkedSuggestedRelationIndexes: Set<Int> = emptySet(),
         // --- AI examples (ephemeral) ---
         val aiExamples: List<AiExample> = emptyList(),
         val isGeneratingExamples: Boolean = false,
@@ -376,6 +377,7 @@ class WordDetailViewModel @Inject constructor(
                 isEnriching = false,
                 isSavingEnrichment = false,
                 linkingSuggestedRelationIndexes = emptySet(),
+                linkedSuggestedRelationIndexes = emptySet(),
             )
         }
     }
@@ -483,6 +485,7 @@ class WordDetailViewModel @Inject constructor(
                                 "${rel.relatedWordId}:${rel.relationType}"
                             },
                             linkingSuggestedRelationIndexes = it.linkingSuggestedRelationIndexes - index,
+                            linkedSuggestedRelationIndexes = it.linkedSuggestedRelationIndexes + index,
                         )
                     }
                 },

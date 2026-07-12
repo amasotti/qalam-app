@@ -35,6 +35,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -490,6 +491,7 @@ private fun WordDetailSheetHost(
                 unavailable = state.enrichmentUnavailable,
                 error = state.enrichmentError,
                 linkingIndexes = state.linkingSuggestedRelationIndexes,
+                linkedIndexes = state.linkedSuggestedRelationIndexes,
                 onStart = onStartEnrichment,
                 onSave = onSaveEnrichment,
                 onLinkRelation = onLinkSuggestedRelation,
@@ -831,7 +833,11 @@ private fun RelationsSheet(
         Text("Link another word", style = Typography.titleMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("RELATED", "SYNONYM", "ANTONYM").forEach { type ->
-                AssistChip(onClick = { relationType = type }, label = { Text(type.lowercase()) })
+                FilterChip(
+                    selected = relationType == type,
+                    onClick = { relationType = type },
+                    label = { Text(type.lowercase()) },
+                )
             }
         }
         OutlinedTextField(
@@ -915,6 +921,7 @@ private fun EnrichmentSheet(
     unavailable: Boolean,
     error: String?,
     linkingIndexes: Set<Int>,
+    linkedIndexes: Set<Int>,
     onStart: () -> Unit,
     onSave: (Boolean, String, Boolean, Boolean, Set<Int>) -> Unit,
     onLinkRelation: (Int, AiRelationSuggestion) -> Unit,
@@ -996,6 +1003,7 @@ private fun EnrichmentSheet(
                             index = index,
                             relation = relation,
                             isLinking = index in linkingIndexes,
+                            isLinked = index in linkedIndexes,
                             onLink = onLinkRelation,
                         )
                     }
@@ -1033,6 +1041,7 @@ private fun SuggestedRelationRow(
     index: Int,
     relation: AiRelationSuggestion,
     isLinking: Boolean,
+    isLinked: Boolean,
     onLink: (Int, AiRelationSuggestion) -> Unit,
 ) {
     Card(
@@ -1052,12 +1061,21 @@ private fun SuggestedRelationRow(
                 relation.translation?.let { Text(it, style = Typography.bodySmall, color = QalamInk) }
                 Text(relation.relationType.lowercase(), style = Typography.labelSmall, color = QalamInk3)
             }
-            OutlinedButton(
-                onClick = { onLink(index, relation) },
-                enabled = !isLinking,
-                shape = RoundedCornerShape(14.dp),
-            ) {
-                Text(if (isLinking) "Linking..." else "Create/link")
+            when {
+                isLinked -> Text(
+                    "Linked",
+                    style = Typography.labelLarge,
+                    color = QalamPrimary,
+                )
+                isLinking -> OutlinedButton(
+                    onClick = {},
+                    enabled = false,
+                    shape = RoundedCornerShape(14.dp),
+                ) { Text("Linking...") }
+                else -> OutlinedButton(
+                    onClick = { onLink(index, relation) },
+                    shape = RoundedCornerShape(14.dp),
+                ) { Text("Create/link") }
             }
         }
     }
