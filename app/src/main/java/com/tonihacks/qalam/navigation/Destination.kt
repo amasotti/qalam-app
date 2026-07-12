@@ -10,6 +10,7 @@ data class  VocabularyListDetail(val listId: String) : Destination
 data class  RootDetail(val rootId: String)   : Destination
 data class  TextDetail(val textId: String)   : Destination
 data object Training    : Destination
+data object Practice    : Destination
 data object Exercise    : Destination
 data object TrainingSummary : Destination
 data object Settings: Destination
