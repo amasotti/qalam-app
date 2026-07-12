@@ -7,10 +7,15 @@ import com.tonihacks.qalam.data.api.dto.CreateWordRelationRequestDto
 import com.tonihacks.qalam.data.api.dto.DictionaryLookupResponseDto
 import com.tonihacks.qalam.data.api.dto.AnalyticsOverviewDto
 import com.tonihacks.qalam.data.api.dto.AnnotationDto
+import com.tonihacks.qalam.data.api.dto.AnswerExerciseItemRequestDto
+import com.tonihacks.qalam.data.api.dto.AnswerExerciseItemResponseDto
 import com.tonihacks.qalam.data.api.dto.CreateAnnotationRequestDto
+import com.tonihacks.qalam.data.api.dto.CreateExerciseSessionRequestDto
 import com.tonihacks.qalam.data.api.dto.CreateWordExampleRequestDto
 import com.tonihacks.qalam.data.api.dto.DictionaryLinkDto
 import com.tonihacks.qalam.data.api.dto.ExampleDto
+import com.tonihacks.qalam.data.api.dto.ExerciseSessionDto
+import com.tonihacks.qalam.data.api.dto.ExerciseSessionSummaryDto
 import com.tonihacks.qalam.data.api.dto.InsightRequestDto
 import com.tonihacks.qalam.data.api.dto.InsightResponseDto
 import com.tonihacks.qalam.data.api.dto.PagedResponseDto
@@ -381,6 +386,36 @@ class ApiClient @Inject constructor(
         sessionId: String,
     ): Result<TrainingSessionSummaryDto> = runCatching {
         httpClient.post("$baseUrl/api/v1/training/sessions/$sessionId/complete").body()
+    }
+
+    // -------------- EXERCISES -----------------
+    suspend fun startExerciseSession(
+        baseUrl: String,
+        request: CreateExerciseSessionRequestDto,
+    ): Result<ExerciseSessionDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/exercise-sessions") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+
+    suspend fun answerExerciseItem(
+        baseUrl: String,
+        sessionId: String,
+        itemId: String,
+        selectedOptionId: String,
+    ): Result<AnswerExerciseItemResponseDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/exercise-sessions/$sessionId/answers") {
+            contentType(ContentType.Application.Json)
+            setBody(AnswerExerciseItemRequestDto(itemId = itemId, selectedOptionId = selectedOptionId))
+        }.body()
+    }
+
+    suspend fun completeExerciseSession(
+        baseUrl: String,
+        sessionId: String,
+    ): Result<ExerciseSessionSummaryDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/exercise-sessions/$sessionId/complete").body()
     }
 
     // -------------- ANALYTICS -----------------
