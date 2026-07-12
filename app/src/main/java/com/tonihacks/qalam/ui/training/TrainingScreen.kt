@@ -68,7 +68,7 @@ import com.tonihacks.qalam.domain.model.MasteryPromotion
 import com.tonihacks.qalam.domain.model.TrainingSessionSummary
 import com.tonihacks.qalam.domain.model.TrainingWord
 import com.tonihacks.qalam.domain.model.TrainingWordRelation
-import com.tonihacks.qalam.domain.model.WordListSummary
+import com.tonihacks.qalam.ui.components.WordListScopePicker
 import com.tonihacks.qalam.ui.theme.MasteryLearning
 import com.tonihacks.qalam.ui.theme.MasteryMastered
 import com.tonihacks.qalam.ui.theme.MasteryReviewing
@@ -191,20 +191,13 @@ private fun TrainingSetupScreen(
         Spacer(Modifier.height(28.dp))
         Text("Scope", style = Typography.labelLarge, color = QalamInk2)
         Spacer(Modifier.height(10.dp))
-        TrainingScopePicker(
+        WordListScopePicker(
             lists = state.wordLists,
             selectedIds = selectedWordListIds,
             isLoading = state.isLoadingWordLists,
             error = state.wordListError,
             onRetry = onRetryWordLists,
-            onSelectAll = { selectedWordListIds = emptySet() },
-            onToggleList = { id ->
-                selectedWordListIds = if (id in selectedWordListIds) {
-                    selectedWordListIds - id
-                } else {
-                    selectedWordListIds + id
-                }
-            },
+            onSelectedIdsChange = { selectedWordListIds = it },
         )
 
         Spacer(Modifier.height(28.dp))
@@ -246,50 +239,6 @@ private fun TrainingSetupScreen(
             contentPadding = PaddingValues(vertical = 14.dp),
         ) {
             Text("Start ${selectedSize}-card session", style = Typography.labelLarge)
-        }
-    }
-}
-
-@Composable
-private fun TrainingScopePicker(
-    lists: List<WordListSummary>,
-    selectedIds: Set<String>,
-    isLoading: Boolean,
-    error: String?,
-    onRetry: () -> Unit,
-    onSelectAll: () -> Unit,
-    onToggleList: (String) -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        SetupOptionButton(
-            title = "All vocabulary",
-            description = if (selectedIds.isEmpty()) "Using the whole pool" else "Clear selected lists",
-            selected = selectedIds.isEmpty(),
-            onClick = onSelectAll,
-        )
-        when {
-            isLoading -> Text("Loading lists...", style = Typography.bodySmall, color = QalamInk2)
-            error != null -> Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(QalamTerraC, RoundedCornerShape(8.dp))
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(error, modifier = Modifier.weight(1f), style = Typography.bodySmall, color = QalamInk)
-                OutlinedButton(onClick = onRetry) { Text("Retry", style = Typography.labelLarge) }
-            }
-            lists.isEmpty() -> Text("No word lists yet.", style = Typography.bodySmall, color = QalamInk2)
-            else -> lists.forEach { list ->
-                SetupOptionButton(
-                    title = list.title,
-                    description = "${list.itemCount} word${if (list.itemCount == 1) "" else "s"}",
-                    selected = list.id in selectedIds,
-                    enabled = list.itemCount > 0,
-                    onClick = { onToggleList(list.id) },
-                )
-            }
         }
     }
 }

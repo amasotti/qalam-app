@@ -6,6 +6,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.tonihacks.qalam.ui.exercise.ExerciseRoute
 import com.tonihacks.qalam.ui.home.HomeScreen
+import com.tonihacks.qalam.ui.practice.PracticeScreen
 import com.tonihacks.qalam.ui.roots.RootDetailScreen
 import com.tonihacks.qalam.ui.roots.RootListScreen
 import com.tonihacks.qalam.ui.settings.SettingsScreen
@@ -30,8 +31,7 @@ fun MainNavDisplay(
             entry<Home> {
                 HomeScreen(
                     onNavigateToSettings = { backStack.add(Settings) },
-                    onStartTraining = { backStack.add(Training) },
-                    onStartExercise = { backStack.add(Exercise) },
+                    onStartPractice = { backStack.add(Practice) },
                     onNavigateToWords = { backStack.add(WordList) },
                     onNavigateToRoots = { backStack.add(RootList) },
                     onNavigateToTexts = { backStack.add(TextList) },
@@ -87,6 +87,13 @@ fun MainNavDisplay(
             }
             entry<Training> {
                 TrainingRoute(onClose = { backStack.removeLastOrNull() })
+            }
+            entry<Practice> {
+                PracticeScreen(
+                    onBack = { backStack.removeLastOrNull() },
+                    onFlashcards = { backStack.add(Training) },
+                    onMultipleChoice = { backStack.add(Exercise) },
+                )
             }
             entry<Exercise> {
                 ExerciseRoute(onClose = { backStack.removeLastOrNull() })

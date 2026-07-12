@@ -32,7 +32,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.outlined.AccountTree
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -72,7 +71,6 @@ import com.tonihacks.qalam.ui.theme.QalamInk3
 import com.tonihacks.qalam.ui.theme.QalamLapis
 import com.tonihacks.qalam.ui.theme.QalamOutline
 import com.tonihacks.qalam.ui.theme.QalamPrimary
-import com.tonihacks.qalam.ui.theme.QalamPrimaryC
 import com.tonihacks.qalam.ui.theme.QalamSurface
 import com.tonihacks.qalam.ui.theme.QalamSurface3
 import com.tonihacks.qalam.ui.theme.QalamTerra
@@ -85,8 +83,7 @@ import java.time.LocalTime
 @Composable
 fun HomeScreen(
     onNavigateToSettings: () -> Unit = {},
-    onStartTraining: () -> Unit = {},
-    onStartExercise: () -> Unit = {},
+    onStartPractice: () -> Unit = {},
     onNavigateToWords: () -> Unit = {},
     onNavigateToRoots: () -> Unit = {},
     onNavigateToTexts: () -> Unit = {},
@@ -125,9 +122,7 @@ fun HomeScreen(
                     onNavigateToSettings = onNavigateToSettings,
                 )
                 Spacer(Modifier.height(22.dp))
-                DueForReviewCard(dueCount = uiState.dueCount, onClick = onStartTraining)
-                Spacer(Modifier.height(12.dp))
-                ExerciseCard(onClick = onStartExercise)
+                PracticeCard(dueCount = uiState.dueCount, onClick = onStartPractice)
                 Spacer(Modifier.height(22.dp))
                 MasteryOverviewCard(totalWords = uiState.totalWords, masteryCounts = uiState.masteryCounts)
                 Spacer(Modifier.height(14.dp))
@@ -271,7 +266,7 @@ private fun ConnectionPill(
 }
 
 @Composable
-private fun DueForReviewCard(dueCount: Int, onClick: () -> Unit) {
+private fun PracticeCard(dueCount: Int, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -291,7 +286,7 @@ private fun DueForReviewCard(dueCount: Int, onClick: () -> Unit) {
         )
         Column {
             Text(
-                text = "DUE FOR REVIEW",
+                    text = "PRACTICE",
                 fontFamily = HankenGrotesk,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 12.sp,
@@ -331,42 +326,13 @@ private fun DueForReviewCard(dueCount: Int, onClick: () -> Unit) {
             ) {
                 Icon(Icons.Filled.Bolt, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                 Text(
-                    text = "Start training session",
+                    text = "Choose practice mode",
                     fontFamily = HankenGrotesk,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp,
                     color = Color.White,
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun ExerciseCard(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(QalamSurface)
-            .border(1.dp, QalamOutline, RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick)
-            .padding(18.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .background(QalamPrimaryC, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = QalamPrimary)
-        }
-        Column(Modifier.weight(1f)) {
-            Text("Multiple choice", style = Typography.titleMedium, color = QalamInk)
-            Spacer(Modifier.height(2.dp))
-            Text("Tap the right answer and let Qalam grade it", style = Typography.bodySmall, color = QalamInk2)
         }
     }
 }
