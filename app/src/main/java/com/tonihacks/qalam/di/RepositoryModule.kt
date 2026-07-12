@@ -7,7 +7,9 @@ import com.tonihacks.qalam.data.repository.RootRepositoryImpl
 import com.tonihacks.qalam.domain.repository.TextRepository
 import com.tonihacks.qalam.data.repository.TextRepositoryImpl
 import com.tonihacks.qalam.data.repository.TrainingRepositoryImpl
+import com.tonihacks.qalam.data.repository.ExerciseRepositoryImpl
 import com.tonihacks.qalam.domain.repository.TrainingRepository
+import com.tonihacks.qalam.domain.repository.ExerciseRepository
 import com.tonihacks.qalam.data.repository.AnalyticsRepositoryImpl
 import com.tonihacks.qalam.domain.repository.AnalyticsRepository
 import com.tonihacks.qalam.data.repository.WordListRepositoryImpl
@@ -36,6 +38,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindTrainingRepository(impl: TrainingRepositoryImpl): TrainingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindExerciseRepository(impl: ExerciseRepositoryImpl): ExerciseRepository
 
     @Binds
     @Singleton
