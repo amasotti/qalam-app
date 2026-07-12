@@ -55,6 +55,7 @@ import com.tonihacks.qalam.domain.model.DictionaryLookupItem
 import com.tonihacks.qalam.domain.model.TextPassage
 import com.tonihacks.qalam.domain.model.TextSentence
 import com.tonihacks.qalam.domain.model.TextToken
+import com.tonihacks.qalam.domain.model.WordAutocomplete
 import com.tonihacks.qalam.domain.model.WordDraft
 import com.tonihacks.qalam.ui.words.AddWordSheet
 import com.tonihacks.qalam.ui.theme.NewsReader
@@ -98,12 +99,17 @@ fun TextReaderScreen(
             lookupItems = s.lookupItems,
             isLookingUp = s.isLookingUp,
             lookupError = s.lookupError,
+            duplicateCandidates = s.duplicateCandidates,
+            isCheckingDuplicates = s.isCheckingDuplicates,
             onBack = onBack,
             onNavigateToWord = onNavigateToWord,
             onAddToVocabulary = viewModel::addTokenToVocabulary,
             onClearLinkError = viewModel::clearLinkError,
             onLookupWord = viewModel::lookupWord,
             onClearLookup = viewModel::clearLookup,
+            onCheckDuplicates = viewModel::checkDuplicates,
+            onClearDuplicateCandidates = viewModel::clearDuplicateCandidates,
+            onLinkToExistingWord = viewModel::linkTokenToExistingWord,
         )
     }
 }
@@ -118,12 +124,17 @@ private fun TextReaderContent(
     lookupItems: List<DictionaryLookupItem>,
     isLookingUp: Boolean,
     lookupError: String?,
+    duplicateCandidates: List<WordAutocomplete>,
+    isCheckingDuplicates: Boolean,
     onBack: () -> Unit,
     onNavigateToWord: (String) -> Unit,
     onAddToVocabulary: (TextToken, WordDraft, () -> Unit) -> Unit,
     onClearLinkError: () -> Unit,
     onLookupWord: (String) -> Unit,
     onClearLookup: () -> Unit,
+    onCheckDuplicates: (String) -> Unit,
+    onClearDuplicateCandidates: () -> Unit,
+    onLinkToExistingWord: (TextToken, WordAutocomplete, () -> Unit) -> Unit,
 ) {
     var mode by remember { mutableStateOf(ReaderMode.INTERLINEAR) }
     var selectedToken by remember { mutableStateOf<TextToken?>(null) }
@@ -279,10 +290,17 @@ private fun TextReaderContent(
             isLookingUp = isLookingUp,
             lookupError = lookupError,
             onLookup = onLookupWord,
+            duplicateCandidates = duplicateCandidates,
+            isCheckingDuplicates = isCheckingDuplicates,
+            onCheckDuplicates = onCheckDuplicates,
+            onSelectExisting = { existing ->
+                onLinkToExistingWord(token, existing) { showAddWordFor = null }
+            },
             onDismiss = {
                 showAddWordFor = null
                 onClearLinkError()
                 onClearLookup()
+                onClearDuplicateCandidates()
             },
             onSave = { draft ->
                 onAddToVocabulary(token, draft) { showAddWordFor = null }

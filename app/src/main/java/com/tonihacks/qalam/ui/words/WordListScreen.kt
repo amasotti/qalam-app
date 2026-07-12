@@ -183,9 +183,18 @@ fun WordListScreen(
             isLookingUp = uiState.isLookingUp,
             lookupError = uiState.lookupError,
             onLookup = viewModel::lookupWord,
+            duplicateCandidates = uiState.duplicateCandidates,
+            isCheckingDuplicates = uiState.isCheckingDuplicates,
+            onCheckDuplicates = viewModel::checkDuplicates,
+            onSelectExisting = { existing ->
+                showAddSheet = false
+                viewModel.clearDuplicateCandidates()
+                onNavigateToWord(existing.id)
+            },
             onDismiss = {
                 showAddSheet = false
                 viewModel.clearLookup()
+                viewModel.clearDuplicateCandidates()
             },
             onSave = { draft ->
                 viewModel.createWord(draft) { showAddSheet = false }

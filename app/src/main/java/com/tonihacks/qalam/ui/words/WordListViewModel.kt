@@ -6,8 +6,10 @@ import com.tonihacks.qalam.data.local.PreferencesRepository
 import com.tonihacks.qalam.domain.model.DictionaryLookupItem
 import com.tonihacks.qalam.domain.model.MasteryLevel
 import com.tonihacks.qalam.domain.model.Word
+import com.tonihacks.qalam.domain.model.WordAutocomplete
 import com.tonihacks.qalam.domain.model.WordDraft
 import com.tonihacks.qalam.domain.repository.WordRepository
+import com.tonihacks.qalam.util.stripDiacritics
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +33,8 @@ data class WordListUiState(
     val lookupItems: List<DictionaryLookupItem> = emptyList(),
     val isLookingUp: Boolean = false,
     val lookupError: String? = null,
+    val duplicateCandidates: List<WordAutocomplete> = emptyList(),
+    val isCheckingDuplicates: Boolean = false,
 )
 
 @HiltViewModel
@@ -88,10 +92,48 @@ class WordListViewModel @Inject constructor(
         _uiState.update { it.copy(lookupItems = emptyList(), lookupError = null) }
     }
 
+    fun checkDuplicates(arabic: String) {
+        val stripped = stripDiacritics(arabic).ifBlank { arabic }
+        viewModelScope.launch {
+            _uiState.update { it.copy(isCheckingDuplicates = true, duplicateCandidates = emptyList()) }
+            val baseUrl = prefs.baseUrl.first()
+            wordRepository.autocompleteWords(baseUrl, stripped).fold(
+                onSuccess = { candidates ->
+                    _uiState.update { it.copy(duplicateCandidates = candidates, isCheckingDuplicates = false) }
+                },
+                onFailure = {
+                    _uiState.update { it.copy(isCheckingDuplicates = false) }
+                },
+            )
+        }
+    }
+
+    fun clearDuplicateCandidates() {
+        _uiState.update { it.copy(duplicateCandidates = emptyList(), isCheckingDuplicates = false) }
+    }
+
     fun createWord(draft: WordDraft, onCreated: () -> Unit) {
         viewModelScope.launch {
             _uiState.update { it.copy(isCreating = true, createWordError = null) }
             val baseUrl = prefs.baseUrl.first()
+
+            // Dedup: check exact match, then consonantal skeleton match
+            val stripped = stripDiacritics(draft.arabicText)
+            val existing = wordRepository.getWordByArabic(baseUrl, draft.arabicText).getOrNull()
+                ?: if (stripped != draft.arabicText) {
+                    wordRepository.getWordByArabic(baseUrl, stripped).getOrNull()
+                } else null
+
+            if (existing != null) {
+                _uiState.update {
+                    it.copy(
+                        isCreating = false,
+                        createWordError = "Already in vocabulary: ${existing.arabicText}",
+                    )
+                }
+                return@launch
+            }
+
             wordRepository.createWord(baseUrl, draft).fold(
                 onSuccess = {
                     _uiState.update {
@@ -100,7 +142,8 @@ class WordListViewModel @Inject constructor(
                             currentPage = 1,
                             hasMore = true,
                             isCreating = false,
-                            createWordError = null
+                            createWordError = null,
+                            duplicateCandidates = emptyList(),
                         )
                     }
                     onCreated()
@@ -109,7 +152,7 @@ class WordListViewModel @Inject constructor(
                 onFailure = { err ->
                     val errMsg = err.message ?: "Failed to add word"
                     _uiState.update { it.copy(isCreating = false, createWordError = errMsg) }
-                }
+                },
             )
         }
     }
