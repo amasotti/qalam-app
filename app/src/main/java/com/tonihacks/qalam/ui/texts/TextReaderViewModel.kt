@@ -8,9 +8,11 @@ import com.tonihacks.qalam.domain.model.TextAnnotation
 import com.tonihacks.qalam.domain.model.TextPassage
 import com.tonihacks.qalam.domain.model.TextSentence
 import com.tonihacks.qalam.domain.model.TextToken
+import com.tonihacks.qalam.domain.model.WordAutocomplete
 import com.tonihacks.qalam.domain.model.WordDraft
 import com.tonihacks.qalam.domain.repository.TextRepository
 import com.tonihacks.qalam.domain.repository.WordRepository
+import com.tonihacks.qalam.util.stripDiacritics
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +34,8 @@ sealed interface TextReaderUiState {
         val lookupItems: List<DictionaryLookupItem> = emptyList(),
         val isLookingUp: Boolean = false,
         val lookupError: String? = null,
+        val duplicateCandidates: List<WordAutocomplete> = emptyList(),
+        val isCheckingDuplicates: Boolean = false,
     ) : TextReaderUiState
     data class Error(val message: String) : TextReaderUiState
 }
@@ -124,8 +128,13 @@ class TextReaderViewModel @Inject constructor(
             }
             val baseUrl = prefs.baseUrl.first()
 
+            val stripped = stripDiacritics(draft.arabicText)
             val wordResult = wordRepository.getWordByArabic(baseUrl, draft.arabicText).mapCatching { existing ->
-                existing ?: wordRepository.createWord(baseUrl, draft).getOrThrow()
+                if (existing != null) return@mapCatching existing
+                val byStripped = if (stripped != draft.arabicText) {
+                    wordRepository.getWordByArabic(baseUrl, stripped).getOrNull()
+                } else null
+                byStripped ?: wordRepository.createWord(baseUrl, draft).getOrThrow()
             }
 
             wordResult.fold(
@@ -196,6 +205,81 @@ class TextReaderViewModel @Inject constructor(
     fun clearLookup() {
         _uiState.update {
             (it as? TextReaderUiState.Success)?.copy(lookupItems = emptyList(), lookupError = null) ?: it
+        }
+    }
+
+    fun checkDuplicates(arabic: String) {
+        val stripped = stripDiacritics(arabic).ifBlank { arabic }
+        viewModelScope.launch {
+            _uiState.update {
+                (it as? TextReaderUiState.Success)?.copy(
+                    isCheckingDuplicates = true, duplicateCandidates = emptyList(),
+                ) ?: it
+            }
+            val baseUrl = prefs.baseUrl.first()
+            wordRepository.autocompleteWords(baseUrl, stripped).fold(
+                onSuccess = { candidates ->
+                    _uiState.update {
+                        (it as? TextReaderUiState.Success)?.copy(
+                            duplicateCandidates = candidates, isCheckingDuplicates = false,
+                        ) ?: it
+                    }
+                },
+                onFailure = {
+                    _uiState.update {
+                        (it as? TextReaderUiState.Success)?.copy(isCheckingDuplicates = false) ?: it
+                    }
+                },
+            )
+        }
+    }
+
+    fun clearDuplicateCandidates() {
+        _uiState.update {
+            (it as? TextReaderUiState.Success)?.copy(
+                duplicateCandidates = emptyList(), isCheckingDuplicates = false,
+            ) ?: it
+        }
+    }
+
+    /**
+     * Link a token directly to an existing vocabulary word without creating a new entry.
+     * Used when the user taps an existing word from the duplicate-candidates list.
+     */
+    fun linkTokenToExistingWord(token: TextToken, word: WordAutocomplete, onDone: () -> Unit) {
+        val current = _uiState.value
+        if (current !is TextReaderUiState.Success) return
+        viewModelScope.launch {
+            _uiState.update {
+                (it as? TextReaderUiState.Success)?.copy(isLinkingWord = true, linkWordError = null) ?: it
+            }
+            val baseUrl = prefs.baseUrl.first()
+            val content = word.translation?.ifBlank { null }
+            textRepository.createAnnotation(
+                baseUrl = baseUrl,
+                textId = current.text.id,
+                anchor = token.arabic,
+                type = VOCABULARY_TYPE,
+                content = content,
+                linkedWordIds = listOf(word.id),
+            ).fold(
+                onSuccess = { annotation ->
+                    val refreshed = textRepository.getAnnotations(baseUrl, current.text.id)
+                        .getOrDefault(current.annotations + annotation)
+                    _uiState.update { state ->
+                        val s = state as? TextReaderUiState.Success ?: return@update state
+                        s.copy(
+                            annotations = refreshed,
+                            sentences = enrichTokens(s.sentences, refreshed),
+                            isLinkingWord = false,
+                            linkWordError = null,
+                            duplicateCandidates = emptyList(),
+                        )
+                    }
+                    onDone()
+                },
+                onFailure = { err -> setLinkError(err.message ?: "Failed to link word") },
+            )
         }
     }
 

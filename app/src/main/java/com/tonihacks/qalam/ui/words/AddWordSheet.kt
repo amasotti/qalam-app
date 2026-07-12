@@ -25,10 +25,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -41,7 +43,9 @@ import androidx.compose.ui.unit.sp
 import com.tonihacks.qalam.domain.model.Dialect
 import com.tonihacks.qalam.domain.model.DictionaryLookupItem
 import com.tonihacks.qalam.domain.model.PartOfSpeech
+import com.tonihacks.qalam.domain.model.WordAutocomplete
 import com.tonihacks.qalam.domain.model.WordDraft
+import com.tonihacks.qalam.util.stripDiacritics
 import com.tonihacks.qalam.ui.theme.NewsReader
 import com.tonihacks.qalam.ui.theme.NotoNaskh
 import com.tonihacks.qalam.ui.theme.QalamInk2
@@ -67,12 +71,26 @@ fun AddWordSheet(
     isLookingUp: Boolean = false,
     lookupError: String? = null,
     onLookup: ((String) -> Unit)? = null,
+    duplicateCandidates: List<WordAutocomplete> = emptyList(),
+    isCheckingDuplicates: Boolean = false,
+    onCheckDuplicates: ((String) -> Unit)? = null,
+    onSelectExisting: ((WordAutocomplete) -> Unit)? = null,
 ) {
     var arabic by remember { mutableStateOf(initialArabic) }
     var translation by remember { mutableStateOf(initialTranslation) }
     var transliteration by remember { mutableStateOf(initialTransliteration) }
     var partOfSpeech by remember { mutableStateOf("UNKNOWN") }
     var dialect by remember { mutableStateOf(initialDialect) }
+
+    if (onCheckDuplicates != null) {
+        LaunchedEffect(arabic) {
+            val trimmed = arabic.trim()
+            if (trimmed.isNotBlank()) {
+                delay(350)
+                onCheckDuplicates(stripDiacritics(trimmed).ifBlank { trimmed })
+            }
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -104,6 +122,26 @@ fun AddWordSheet(
                 ),
                 singleLine = true,
             )
+
+            if (isCheckingDuplicates) {
+                CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp, color = QalamLapis)
+            } else if (duplicateCandidates.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        "Already in your vocabulary",
+                        style = Typography.labelSmall,
+                        color = QalamLapis,
+                        modifier = Modifier.padding(bottom = 2.dp),
+                    )
+                    duplicateCandidates.take(5).forEach { candidate ->
+                        ExistingWordRow(
+                            candidate = candidate,
+                            onClick = { onSelectExisting?.invoke(candidate) },
+                        )
+                        HorizontalDivider(color = QalamSurface2)
+                    }
+                }
+            }
 
             if (onLookup != null) {
                 OutlinedButton(
@@ -216,6 +254,29 @@ fun AddWordSheet(
                     Text("Save")
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ExistingWordRow(candidate: WordAutocomplete, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+            Text(
+                text = candidate.arabicText,
+                style = TextStyle(fontFamily = NotoNaskh, fontSize = 22.sp),
+                color = QalamLapis,
+            )
+        }
+        candidate.translation?.let {
+            Text(it, style = Typography.bodySmall, color = QalamInk2)
         }
     }
 }
