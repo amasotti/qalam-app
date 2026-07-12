@@ -15,6 +15,7 @@ data class TextDto(
     val translation: String? = null,
     val difficulty: String,
     val dialect: String,
+    val comments: String? = null,
     val tags: List<String> = emptyList(),
 )
 
@@ -47,6 +48,7 @@ fun TextDto.toDomain() = TextPassage(
     translation = translation,
     difficulty = difficulty,
     dialect = dialect,
+    comments = comments,
     tags = tags,
 )
 

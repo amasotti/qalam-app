@@ -8,6 +8,7 @@ data class TextPassage(
     val translation: String?,
     val difficulty: String,
     val dialect: String,
+    val comments: String? = null,
     val tags: List<String> = emptyList(),
 )
 
