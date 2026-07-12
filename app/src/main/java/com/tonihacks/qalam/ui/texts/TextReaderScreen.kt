@@ -138,28 +138,29 @@ private fun TextReaderContent(
             IconButton(onClick = onBack) {
                 Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
             }
-            Text(
-                text.title,
-                style = TextStyle(fontFamily = NewsReader, fontStyle = FontStyle.Italic, fontSize = 18.sp),
-                color = QalamInk,
-            )
         }
 
         LazyColumn(
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(bottom = 32.dp),
         ) {
-            // 2. Arabic title + chips
+            // 2. Title + comments + chips
             item {
                 Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp)) {
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text(
+                        text.title,
+                        style = TextStyle(fontFamily = NewsReader, fontStyle = FontStyle.Italic, fontSize = 24.sp, lineHeight = 32.sp),
+                        color = QalamInk,
+                    )
+                    text.comments?.let { notes ->
+                        Spacer(Modifier.height(6.dp))
                         Text(
-                            text = text.arabicPreview(),
-                            style = TextStyle(fontFamily = NotoNaskh, fontSize = 32.sp, lineHeight = 42.sp),
-                            modifier = Modifier.fillMaxWidth(),
+                            notes,
+                            style = Typography.bodyMedium,
+                            color = QalamInk2,
                         )
                     }
-                    Spacer(Modifier.height(10.dp))
+                    Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         SuggestionChip(
                             onClick = {},

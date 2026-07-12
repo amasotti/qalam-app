@@ -26,17 +26,14 @@ import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -44,7 +41,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tonihacks.qalam.domain.model.Dialect
 import com.tonihacks.qalam.domain.model.TextPassage
 import com.tonihacks.qalam.ui.theme.NewsReader
-import com.tonihacks.qalam.ui.theme.NotoNaskh
 import com.tonihacks.qalam.ui.theme.QalamInk
 import com.tonihacks.qalam.ui.theme.QalamInk2
 import com.tonihacks.qalam.ui.theme.QalamLapis
@@ -154,24 +150,23 @@ private fun TextRow(text: TextPassage, onClick: () -> Unit) {
             )
         }
 
-        Spacer(Modifier.height(10.dp))
-
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            Text(
-                text = text.arabicPreview(),
-                style = TextStyle(fontFamily = NotoNaskh, fontSize = 30.sp, lineHeight = 40.sp),
-                modifier = Modifier.fillMaxWidth(),
-                maxLines = 1,
-            )
-        }
-
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(8.dp))
 
         Text(
             text.title,
-            style = TextStyle(fontFamily = NewsReader, fontStyle = FontStyle.Italic, fontSize = 17.sp),
+            style = TextStyle(fontFamily = NewsReader, fontStyle = FontStyle.Italic, fontSize = 19.sp),
             color = QalamInk,
         )
+
+        text.comments?.let { notes ->
+            Spacer(Modifier.height(4.dp))
+            Text(
+                notes,
+                style = Typography.bodySmall,
+                color = QalamInk2,
+                maxLines = 2,
+            )
+        }
 
         Spacer(Modifier.height(8.dp))
 
@@ -183,8 +178,6 @@ private fun TextRow(text: TextPassage, onClick: () -> Unit) {
 }
 
 // Helpers shared with TextReaderScreen — same package.
-
-fun TextPassage.arabicPreview(): String = body.lineSequence().firstOrNull { it.isNotBlank() }?.trim().orEmpty()
 
 fun dialectLabel(raw: String): String = runCatching { Dialect.valueOf(raw) }.getOrNull()?.let {
     when (it) {
