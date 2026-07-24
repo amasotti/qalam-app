@@ -12,6 +12,7 @@ data class  TextDetail(val textId: String)   : Destination
 data object Training    : Destination
 data object Practice    : Destination
 data object Exercise    : Destination
+data object ProductionPractice : Destination
 data object TrainingSummary : Destination
 data object Settings: Destination
 

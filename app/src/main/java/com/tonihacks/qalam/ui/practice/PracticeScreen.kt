@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -45,6 +46,7 @@ fun PracticeScreen(
     onBack: () -> Unit,
     onFlashcards: () -> Unit,
     onMultipleChoice: () -> Unit,
+    onSentenceProduction: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -82,6 +84,15 @@ fun PracticeScreen(
             tint = QalamGold,
             container = QalamGoldC,
             onClick = onMultipleChoice,
+        )
+        Spacer(Modifier.height(12.dp))
+        PracticeModeCard(
+            title = "Sentence practice",
+            description = "Write with target words and get AI feedback.",
+            icon = Icons.Outlined.Edit,
+            tint = QalamPrimary,
+            container = QalamPrimaryC,
+            onClick = onSentenceProduction,
         )
     }
 }

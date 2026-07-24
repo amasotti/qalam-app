@@ -7,6 +7,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.tonihacks.qalam.ui.exercise.ExerciseRoute
 import com.tonihacks.qalam.ui.home.HomeScreen
 import com.tonihacks.qalam.ui.practice.PracticeScreen
+import com.tonihacks.qalam.ui.productionpractice.ProductionPracticeRoute
 import com.tonihacks.qalam.ui.roots.RootDetailScreen
 import com.tonihacks.qalam.ui.roots.RootListScreen
 import com.tonihacks.qalam.ui.settings.SettingsScreen
@@ -93,10 +94,14 @@ fun MainNavDisplay(
                     onBack = { backStack.removeLastOrNull() },
                     onFlashcards = { backStack.add(Training) },
                     onMultipleChoice = { backStack.add(Exercise) },
+                    onSentenceProduction = { backStack.add(ProductionPractice) },
                 )
             }
             entry<Exercise> {
                 ExerciseRoute(onClose = { backStack.removeLastOrNull() })
+            }
+            entry<ProductionPractice> {
+                ProductionPracticeRoute(onClose = { backStack.removeLastOrNull() })
             }
             entry<Settings> { SettingsScreen(onBack = { backStack.removeLastOrNull() }) }
         }
