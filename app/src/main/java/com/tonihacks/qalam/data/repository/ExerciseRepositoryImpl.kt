@@ -6,6 +6,7 @@ import com.tonihacks.qalam.data.api.dto.toDomain
 import com.tonihacks.qalam.domain.model.ExerciseAnswer
 import com.tonihacks.qalam.domain.model.ExerciseSession
 import com.tonihacks.qalam.domain.model.ExerciseSessionSummary
+import com.tonihacks.qalam.domain.model.ExerciseType
 import com.tonihacks.qalam.domain.repository.ExerciseRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,7 +21,7 @@ class ExerciseRepositoryImpl @Inject constructor(
         mode: String,
         size: Int,
         wordListIds: List<String>,
-        exerciseTypes: List<String>,
+        exerciseTypes: List<ExerciseType>,
         optionCount: Int,
     ): Result<ExerciseSession> =
         apiClient.startExerciseSession(
@@ -29,7 +30,7 @@ class ExerciseRepositoryImpl @Inject constructor(
                 mode = mode,
                 size = size,
                 wordListIds = wordListIds,
-                exerciseTypes = exerciseTypes,
+                exerciseTypes = exerciseTypes.map(ExerciseType::name),
                 optionCount = optionCount,
             ),
         ).map { it.toDomain() }

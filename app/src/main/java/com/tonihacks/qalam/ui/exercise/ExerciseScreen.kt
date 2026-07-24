@@ -56,6 +56,7 @@ import com.tonihacks.qalam.domain.model.ExerciseOption
 import com.tonihacks.qalam.domain.model.ExercisePromptKind
 import com.tonihacks.qalam.domain.model.ExerciseResult
 import com.tonihacks.qalam.domain.model.ExerciseSessionSummary
+import com.tonihacks.qalam.domain.model.ExerciseType
 import com.tonihacks.qalam.ui.components.WordListScopePicker
 import com.tonihacks.qalam.ui.theme.NotoNaskh
 import com.tonihacks.qalam.ui.theme.QalamBg
@@ -102,7 +103,7 @@ fun ExerciseRoute(
 fun ExerciseScreen(
     state: ExerciseUiState,
     onClose: () -> Unit,
-    onStart: (String, Int, List<String>) -> Unit,
+    onStart: (String, Int, List<String>, List<ExerciseType>) -> Unit,
     onRetryWordLists: () -> Unit,
     onAnswer: (String) -> Unit,
     onNext: () -> Unit,
@@ -143,16 +144,46 @@ private enum class ExerciseModeOption(
 
 private val ExerciseSizeOptions = listOf(5, 10, 15, 20)
 
+private enum class ExerciseTypeOption(
+    val type: ExerciseType,
+    val title: String,
+    val description: String,
+) {
+    Meaning(
+        ExerciseType.MULTIPLE_CHOICE_MEANING,
+        "Arabic → meaning",
+        "Read Arabic, choose its meaning",
+    ),
+    Arabic(
+        ExerciseType.MULTIPLE_CHOICE_ARABIC,
+        "Meaning → Arabic",
+        "Read meaning, choose Arabic",
+    ),
+    ConfusableMeaning(
+        ExerciseType.CONFUSABLE_MEANING,
+        "Confusable meanings",
+        "Arabic with deliberately similar meanings",
+    ),
+    ConfusableArabic(
+        ExerciseType.CONFUSABLE_ARABIC,
+        "Confusable Arabic",
+        "Meaning with deliberately similar Arabic words",
+    ),
+}
+
 @Composable
 private fun ExerciseSetupScreen(
     state: ExerciseUiState,
     onClose: () -> Unit,
-    onStart: (String, Int, List<String>) -> Unit,
+    onStart: (String, Int, List<String>, List<ExerciseType>) -> Unit,
     onRetryWordLists: () -> Unit,
 ) {
     var selectedMode by remember { mutableStateOf(ExerciseModeOption.Mixed) }
     var selectedSize by remember { mutableStateOf(10) }
     var selectedWordListIds by remember { mutableStateOf(emptySet<String>()) }
+    var selectedExerciseTypes by remember {
+        mutableStateOf(setOf(ExerciseType.MULTIPLE_CHOICE_MEANING))
+    }
 
     Column(
         modifier = Modifier
@@ -188,6 +219,28 @@ private fun ExerciseSetupScreen(
         }
 
         Spacer(Modifier.height(28.dp))
+        Text("Question style", style = Typography.labelLarge, color = QalamInk2)
+        Spacer(Modifier.height(4.dp))
+        Text("Choose one or more. Selected styles alternate.", style = Typography.bodySmall, color = QalamInk2)
+        Spacer(Modifier.height(10.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            ExerciseTypeOption.entries.forEach { option ->
+                SetupOptionButton(
+                    title = option.title,
+                    description = option.description,
+                    selected = option.type in selectedExerciseTypes,
+                    onClick = {
+                        selectedExerciseTypes = when {
+                            option.type !in selectedExerciseTypes -> selectedExerciseTypes + option.type
+                            selectedExerciseTypes.size > 1 -> selectedExerciseTypes - option.type
+                            else -> selectedExerciseTypes
+                        }
+                    },
+                )
+            }
+        }
+
+        Spacer(Modifier.height(28.dp))
         Text("Questions", style = Typography.labelLarge, color = QalamInk2)
         Spacer(Modifier.height(10.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -203,7 +256,16 @@ private fun ExerciseSetupScreen(
 
         Spacer(Modifier.height(32.dp))
         Button(
-            onClick = { onStart(selectedMode.value, selectedSize, selectedWordListIds.toList()) },
+            onClick = {
+                onStart(
+                    selectedMode.value,
+                    selectedSize,
+                    selectedWordListIds.toList(),
+                    ExerciseTypeOption.entries
+                        .filter { it.type in selectedExerciseTypes }
+                        .map(ExerciseTypeOption::type),
+                )
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = QalamPrimary,

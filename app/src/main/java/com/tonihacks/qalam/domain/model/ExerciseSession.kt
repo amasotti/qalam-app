@@ -7,6 +7,13 @@ data class ExerciseSession(
     val items: List<ExerciseItem>,
 )
 
+enum class ExerciseType {
+    MULTIPLE_CHOICE_MEANING,
+    MULTIPLE_CHOICE_ARABIC,
+    CONFUSABLE_MEANING,
+    CONFUSABLE_ARABIC,
+}
+
 data class ExerciseItem(
     val id: String,
     val wordId: String,
