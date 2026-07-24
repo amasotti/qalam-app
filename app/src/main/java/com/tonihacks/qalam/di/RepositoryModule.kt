@@ -14,6 +14,8 @@ import com.tonihacks.qalam.data.repository.AnalyticsRepositoryImpl
 import com.tonihacks.qalam.domain.repository.AnalyticsRepository
 import com.tonihacks.qalam.data.repository.WordListRepositoryImpl
 import com.tonihacks.qalam.domain.repository.WordListRepository
+import com.tonihacks.qalam.data.repository.ProductionPracticeRepositoryImpl
+import com.tonihacks.qalam.domain.repository.ProductionPracticeRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -50,4 +52,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindWordListRepository(impl: WordListRepositoryImpl): WordListRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindProductionPracticeRepository(
+        impl: ProductionPracticeRepositoryImpl,
+    ): ProductionPracticeRepository
 }

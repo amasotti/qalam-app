@@ -19,7 +19,10 @@ import com.tonihacks.qalam.data.api.dto.ExerciseSessionSummaryDto
 import com.tonihacks.qalam.data.api.dto.InsightRequestDto
 import com.tonihacks.qalam.data.api.dto.InsightResponseDto
 import com.tonihacks.qalam.data.api.dto.PagedResponseDto
+import com.tonihacks.qalam.data.api.dto.ProductionPracticePromptDto
+import com.tonihacks.qalam.data.api.dto.ProductionPracticeReviewDto
 import com.tonihacks.qalam.data.api.dto.RootDto
+import com.tonihacks.qalam.data.api.dto.ReviewProductionPracticeRequestDto
 import com.tonihacks.qalam.data.api.dto.SentenceDto
 import com.tonihacks.qalam.data.api.dto.RecordTrainingResultRequestDto
 import com.tonihacks.qalam.data.api.dto.RecordTrainingResultResponseDto
@@ -416,6 +419,22 @@ class ApiClient @Inject constructor(
         sessionId: String,
     ): Result<ExerciseSessionSummaryDto> = runCatching {
         httpClient.post("$baseUrl/api/v1/exercise-sessions/$sessionId/complete").body()
+    }
+
+    // -------------- PRODUCTION PRACTICE -----------------
+    suspend fun getProductionPracticePrompt(baseUrl: String): Result<ProductionPracticePromptDto> = runCatching {
+        httpClient.get("$baseUrl/api/v1/production-practice/prompt").body()
+    }
+
+    suspend fun reviewProductionPractice(
+        baseUrl: String,
+        request: ReviewProductionPracticeRequestDto,
+    ): Result<ProductionPracticeReviewDto> = runCatching {
+        httpClient.post("$baseUrl/api/v1/production-practice/reviews") {
+            aiRequestTimeout()
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
     }
 
     // -------------- ANALYTICS -----------------
