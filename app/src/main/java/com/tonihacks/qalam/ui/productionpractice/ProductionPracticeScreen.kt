@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -28,7 +31,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
@@ -50,6 +56,7 @@ import com.tonihacks.qalam.ui.theme.QalamPrimaryC
 import com.tonihacks.qalam.ui.theme.QalamSurface
 import com.tonihacks.qalam.ui.theme.QalamTerra
 import com.tonihacks.qalam.ui.theme.Typography
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProductionPracticeRoute(
@@ -81,6 +88,7 @@ private fun ProductionPracticeScreen(
             .fillMaxSize()
             .background(QalamBg)
             .verticalScroll(rememberScrollState())
+            .imePadding()
             .padding(horizontal = 20.dp, vertical = 12.dp),
     ) {
         Header(onClose)
@@ -136,6 +144,8 @@ private fun PracticeContent(
     onSubmit: () -> Unit,
 ) {
     val prompt = state.prompt ?: return
+    val editorRequester = remember { BringIntoViewRequester() }
+    val coroutineScope = rememberCoroutineScope()
     Spacer(Modifier.height(16.dp))
     Text("Write one Arabic sentence using at least two targets.", style = Typography.bodyMedium, color = QalamInk2)
     Spacer(Modifier.height(20.dp))
@@ -157,7 +167,14 @@ private fun PracticeContent(
         TextField(
             value = state.sentence,
             onValueChange = onSentenceChange,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .bringIntoViewRequester(editorRequester)
+                .onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        coroutineScope.launch { editorRequester.bringIntoView() }
+                    }
+                },
             textStyle = Typography.bodyLarge.copy(fontFamily = NotoNaskh, fontSize = 24.sp, textAlign = TextAlign.Start),
             placeholder = { Text("اكتب جملة بالعربية", fontFamily = NotoNaskh, fontSize = 24.sp) },
             minLines = 4,
