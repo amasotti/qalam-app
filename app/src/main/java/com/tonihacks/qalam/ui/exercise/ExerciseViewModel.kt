@@ -7,6 +7,7 @@ import com.tonihacks.qalam.domain.model.ExerciseAnswer
 import com.tonihacks.qalam.domain.model.ExerciseItem
 import com.tonihacks.qalam.domain.model.ExerciseSession
 import com.tonihacks.qalam.domain.model.ExerciseSessionSummary
+import com.tonihacks.qalam.domain.model.ExerciseType
 import com.tonihacks.qalam.domain.model.WordListSummary
 import com.tonihacks.qalam.domain.repository.ExerciseRepository
 import com.tonihacks.qalam.domain.repository.WordListRepository
@@ -56,6 +57,7 @@ class ExerciseViewModel @Inject constructor(
         mode: String = "MIXED",
         size: Int = 10,
         wordListIds: List<String> = emptyList(),
+        exerciseTypes: List<ExerciseType> = listOf(ExerciseType.MULTIPLE_CHOICE_MEANING),
     ) {
         viewModelScope.launch {
             _uiState.update {
@@ -72,6 +74,7 @@ class ExerciseViewModel @Inject constructor(
                 mode = mode,
                 size = size,
                 wordListIds = wordListIds,
+                exerciseTypes = exerciseTypes,
             ).fold(
                 onSuccess = { session ->
                     _uiState.update {

@@ -3,6 +3,7 @@ package com.tonihacks.qalam.domain.repository
 import com.tonihacks.qalam.domain.model.ExerciseAnswer
 import com.tonihacks.qalam.domain.model.ExerciseSession
 import com.tonihacks.qalam.domain.model.ExerciseSessionSummary
+import com.tonihacks.qalam.domain.model.ExerciseType
 
 interface ExerciseRepository {
     suspend fun startSession(
@@ -10,7 +11,7 @@ interface ExerciseRepository {
         mode: String = "MIXED",
         size: Int = 10,
         wordListIds: List<String> = emptyList(),
-        exerciseTypes: List<String> = listOf("MULTIPLE_CHOICE_MEANING"),
+        exerciseTypes: List<ExerciseType> = listOf(ExerciseType.MULTIPLE_CHOICE_MEANING),
         optionCount: Int = 4,
     ): Result<ExerciseSession>
 
